@@ -24,12 +24,34 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="farm"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: '내 농장',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="leaf.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="plant"
+        options={{
+          title: '식물식별',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="camera.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="dm"
+        options={{
+          title: '채팅',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="message.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: '프로필',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+        }}
+      />
+      
     </Tabs>
   );
 }
