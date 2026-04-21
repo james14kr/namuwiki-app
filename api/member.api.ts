@@ -1,8 +1,8 @@
 // member 관련 api 모음집!
 
 import type { addAdminParam, MemberData } from "@/types/memberType";
-import { api } from "@/utils";
-import { data } from "react-router-dom";
+import { api } from "@/utils/axios";
+
 
 /**
  *

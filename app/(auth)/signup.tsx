@@ -29,7 +29,7 @@ interface JoinFormProps {
   successJoin: (isSuccess: boolean) => void;
 }
 
-const Signup = ({seccessJoin} : JoinFormProps) => {
+const Signup = ({successJoin} : JoinFormProps) => {
   const usePostJoinDataMutate = usePostJoinData();
   // 페이지 이동
   const [step, setStep] = useState(1);
@@ -38,7 +38,7 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
     memRole: "",
     memEmail: "",
     memPw: "",
-    memNickName: "",
+    memNickname: "",
     memName: "",
     memTel: "",
     memAdd: "",
@@ -231,7 +231,7 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
 
   // 이메일 중복 체크 함수
   const checkEmail = async () => {
-    if (isNullOrEmpty(memEmail)) {
+    if (joinData.memEmail) {
       errorToast("이메일을 입력하세요.");
       return;
     }
@@ -292,9 +292,9 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
           <View>
             <Input label="이메일" isPw={false} />
             {errorMsg.memEmail && (
-              <p className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
                 {errorMsg.memEmail}
-              </p>
+              </Text>
             )}
             <TouchableOpacity>
               <Text>중복확인</Text>
@@ -302,12 +302,27 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
           </View>
           <View>
             <Input label="비밀번호" isPw={true} />
+            {errorMsg.memPw && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.memPw}
+              </Text>
+            )}
           </View>
           <View>
             <Input label="비밀번호 확인" isPw={true} />
+            {errorMsg.confirmData && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.confirmData}
+              </Text>
+            )}
           </View>
           <View>
             <Input label="닉네임" isPw={false} />
+            {errorMsg.memNickname && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.memNickname}
+              </Text>
+            )}
             <TouchableOpacity>
               <Text>중복확인</Text>
             </TouchableOpacity>
@@ -324,12 +339,27 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
           <Text>개인 정보</Text>
           <View>
             <Input label="이름" isPw={false} />
+            {errorMsg.memName && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.memName}
+              </Text>
+            )}
           </View>
           <View>
             <Input label="전화번호" isPw={false} />
+            {errorMsg.memTel && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.memTel}
+              </Text>
+            )}
           </View>
           <View>
             <Input label="주소" isPw={false} />
+            {errorMsg.memAdd && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.memAdd}
+              </Text>
+            )}
             <TouchableOpacity onPress={() => {}}>
               <Text>주소 찾기</Text>
             </TouchableOpacity>
@@ -352,8 +382,18 @@ const Signup = ({seccessJoin} : JoinFormProps) => {
           <Text>인증/ 추가 정보</Text>
           <View>
             <Input label="인증번호" isPw={false} />
+            {errorMsg.authCode && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.authCode}
+              </Text>
+            )}
             {joinData.memRole === "farmer" && (
               <Input label="농장명" isPw={false} />
+            )}
+            {errorMsg.farmerName && (
+              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+                {errorMsg.farmerName}
+              </Text>
             )}
           </View>
           <TouchableOpacity onPress={prevStep}>
