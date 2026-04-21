@@ -1,14 +1,11 @@
 import Input from "@/components/ui/Input";
 import { usePostJoinData } from "@/queries/member.queries";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
+import DaumPostcode from 'react-native-daum-postcode'
 
 // zod + react hook 사용해서 실시간 유효성검사 실행
 interface SignUpStoreStateType {
@@ -29,7 +26,7 @@ interface JoinFormProps {
   successJoin: (isSuccess: boolean) => void;
 }
 
-const Signup = ({successJoin} : JoinFormProps) => {
+const Signup = ({ successJoin }: JoinFormProps) => {
   const usePostJoinDataMutate = usePostJoinData();
   // 페이지 이동
   const [step, setStep] = useState(1);
@@ -66,6 +63,36 @@ const Signup = ({successJoin} : JoinFormProps) => {
 
   //권한 타입 저장 할 state 변수
   const [userType, setUserType] = useState<"FARMER" | "USER">("USER");
+
+  // 다음 주소 저장할 state 변수
+  const [showPostcode, setShowPostcode] = useState(false);
+
+  // 각 단계별 검사할 필드 정의
+  const stepFields = {
+    1: ["memEmail", "memPw", "confirmData", "memNickname"],
+    2: ["memName", "memTel", "memAdd"],
+    3: ["authCode", "farmerName"],
+  };
+
+  // 다음 버튼 클릭 시 해당 단계 필드만 검사
+  const handleNextStep = () => {
+    const currentFields = stepFields[step as keyof typeof stepFields];
+    const hasError = currentFields.some(
+      (field) => errorMsg[field as keyof SignUpStoreStateType],
+    );
+    const isEmpty = currentFields.some(
+      (field) => {
+        if(field === "confirmData") return !confirmData
+        if(field === "farmerName" && userType !== "FARMER") return false;
+        return !joinData[field as keyof typeof joinData]}
+    );
+
+    if (hasError || isEmpty) {
+      Toast.show({ type: "error", text1: "빠진 문항을 입력해주세요." });
+      return;
+    }
+    nextStep();
+  };
 
   //유효성 검사 실시할 함수
   const validateForm = (data: typeof joinData) => {
@@ -168,7 +195,7 @@ const Signup = ({successJoin} : JoinFormProps) => {
   };
 
   // 비밀번호 확인 유효성 검사실행 함수
-  const handleConfirmChange = (value : string) => {
+  const handleConfirmChange = (value: string) => {
     setConFirmData(value);
 
     // joinData의 비밀번호랑 비교
@@ -186,38 +213,13 @@ const Signup = ({successJoin} : JoinFormProps) => {
 
   // 버튼 누르면 joinData 전체 유효성 검사 실행 + 회원가입 등록
   const validate = async () => {
-    // 전체 유효성 검사 실행 결과 저장
-
-    // 만약 유효성검사 결과가 실패라면
-    if (!isDisable.success) {
-      const fieldErrors: Partial<SignUpStoreStateType> = {};
-
-      isDisable.error.issues.forEach((issue) => {
-        const fieldName = issue.path[0] as keyof SignUpStoreStateType;
-        if (!fieldErrors[fieldName]) {
-          fieldErrors[fieldName] = issue.message;
-        }
-      });
-      setErrorMsg(fieldErrors);
-      return false;
-    }
-    // 유효성 검사 결과가 성공이라면
-    else {
+    try {
       setErrorMsg({});
-      await toastMutation(
-        usePostJoinDataMutate.mutateAsync,
-        joinData,
-        "로딩 중입니다!",
-        () => {
-          successJoin(true);
-          return "회원이 되신 것을 축하합니다!";
-        },
-        (error) => {
-          console.error(error);
-          return "어이쿠 실패입니다ㅜ.ㅜ";
-        },
-      );
-      return true;
+      await usePostJoinDataMutate.mutateAsync(joinData);
+      Toast.show({ type: "success", text1: "회원이 되신 것을 축하합니다." });
+      successJoin(true);
+    } catch (error) {
+      Toast.show({ type: "error", text1: "어이쿠 실패입니다ㅜ.ㅜ" });
     }
   };
 
@@ -272,14 +274,14 @@ const Signup = ({successJoin} : JoinFormProps) => {
       </View>
 
       {/* 진행 표시 */}
-      <Text>Step {step} / 3</Text>
+      <Text>Step {step} / {userType === "FARMER" ? 3 : 2}</Text>
 
       {/* 권한 선택 */}
       <View>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={() => setUserType("FARMER")}>
           <Text>농업인</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={() => setUserType("USER")}>
           <Text>일반 유저</Text>
         </TouchableOpacity>
       </View>
@@ -290,9 +292,14 @@ const Signup = ({successJoin} : JoinFormProps) => {
         <View>
           <Text>계정 정보</Text>
           <View>
-            <Input label="이메일" isPw={false} />
+            <Input 
+              label="이메일" 
+              isPw={false} 
+              value={joinData.memEmail}
+              onChangeText={(value) => handleChange("memEmail", value)}
+            />
             {errorMsg.memEmail && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memEmail}
               </Text>
             )}
@@ -301,25 +308,40 @@ const Signup = ({successJoin} : JoinFormProps) => {
             </TouchableOpacity>
           </View>
           <View>
-            <Input label="비밀번호" isPw={true} />
+            <Input 
+              label="비밀번호" 
+              isPw={true} 
+              value={joinData.memPw}
+              onChangeText={(value) => handleChange("memPw", value)}
+            />
             {errorMsg.memPw && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memPw}
               </Text>
             )}
           </View>
           <View>
-            <Input label="비밀번호 확인" isPw={true} />
+            <Input 
+              label="비밀번호 확인" 
+              isPw={true} 
+              value={confirmData}
+              onChangeText={handleConfirmChange}
+            />
             {errorMsg.confirmData && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.confirmData}
               </Text>
             )}
           </View>
           <View>
-            <Input label="닉네임" isPw={false} />
+            <Input 
+              label="닉네임" 
+              isPw={false} 
+              value={joinData.memNickname}
+              onChangeText={(value) => handleChange("memNickname", value)}
+            />
             {errorMsg.memNickname && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memNickname}
               </Text>
             )}
@@ -327,7 +349,7 @@ const Signup = ({successJoin} : JoinFormProps) => {
               <Text>중복확인</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={nextStep}>
+          <TouchableOpacity onPress={handleNextStep}>
             <Text>다음</Text>
           </TouchableOpacity>
         </View>
@@ -338,60 +360,105 @@ const Signup = ({successJoin} : JoinFormProps) => {
         <View>
           <Text>개인 정보</Text>
           <View>
-            <Input label="이름" isPw={false} />
+            <Input
+              label="이름"
+              isPw={false}
+              value={joinData.memName}
+              onChangeText={(value) => handleChange("memName", value)}
+            />
             {errorMsg.memName && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memName}
               </Text>
             )}
           </View>
           <View>
-            <Input label="전화번호" isPw={false} />
+            <Input 
+              label="전화번호" 
+              isPw={false} 
+              value={joinData.memTel}
+              onChangeText={(value) => handleChange("memTel", value)}
+            />
             {errorMsg.memTel && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memTel}
               </Text>
             )}
           </View>
           <View>
-            <Input label="주소" isPw={false} />
+            <Input 
+              label="주소" 
+              isPw={false} 
+              value={joinData.memAdd}
+              onChangeText={(value) => handleChange("memAdd", value)}
+            />
             {errorMsg.memAdd && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.memAdd}
               </Text>
             )}
-            <TouchableOpacity onPress={() => {}}>
+            {
+              showPostcode && (
+                <Modal visible={showPostcode} animationType="slide">
+                  <DaumPostcode onSelected={(data) => {
+                      const updateData = {...joinData, memAdd: data.address}
+                      setJoinData(updateData);
+                      validateForm(updateData);
+                      setShowPostcode(false);
+                    }}
+                    onError={() => setShowPostcode(false)} 
+                  />
+                  <TouchableOpacity onPress={() => setShowPostcode(false)}>
+                    <Text>닫기</Text>
+                  </TouchableOpacity>
+                </Modal>
+              )
+            }
+            <TouchableOpacity onPress={() => setShowPostcode(true)}>
               <Text>주소 찾기</Text>
             </TouchableOpacity>
           </View>
           <View>
-            <Input label="상세주소" isPw={false} />
+            <Input 
+              label="상세주소" 
+              isPw={false} 
+              value={joinData.addDetail}
+              onChangeText={(value) => handleChange("addDetail", value)}
+            />
           </View>
           <TouchableOpacity onPress={prevStep}>
             <Text>이전</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={nextStep}>
-            <Text>다음</Text>
+          <TouchableOpacity onPress={userType === "FARMER" ? handleNextStep : validate}>
+            <Text>{userType === "FARMER" ? "다음" : "Sign Up"}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* 3단계 */}
-      {step === 3 && (
-        <View>
-          <Text>인증/ 추가 정보</Text>
+      {step === 3 && userType === "FARMER" && (
           <View>
-            <Input label="인증번호" isPw={false} />
+            <Text>인증 / 추가 정보</Text>
+          <View>
+            <Input 
+              label="인증번호" 
+              isPw={false} 
+              value={joinData.authCode}
+              onChangeText={(value) => handleChange("authCode", value)}
+            />
             {errorMsg.authCode && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.authCode}
               </Text>
             )}
-            {joinData.memRole === "farmer" && (
-              <Input label="농장명" isPw={false} />
-            )}
+            <Input 
+              label="농장명" 
+              isPw={false} 
+              value={joinData.farmerName}
+              onChangeText={(value) => handleChange("farmerName", value)}
+            />
             {errorMsg.farmerName && (
-              <Text className="err-msg mt-1 pl-1 text-xs text-red-500">
+              <Text style={styles.errorMsg}>
                 {errorMsg.farmerName}
               </Text>
             )}
@@ -418,4 +485,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderWidth: 1,
   },
+  errorMsg: {
+    color: 'red', fontSize: 12, marginTop: 4 
+  }
 });

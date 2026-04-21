@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useState } from 'react'
 
-const Input = ({label, isPw=false}, ...props) => {
+const Input = ({label, isPw=false, ...props} ) => {
   // 포커스 유무의 상태값을 저장하고 있는 변수
   const [isFocused, setIsFocused] = useState(false);
 
