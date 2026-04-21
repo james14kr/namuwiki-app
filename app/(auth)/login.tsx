@@ -10,7 +10,7 @@ const Login = () => {
 
   //임시 로그인 - 나중에 실제 API로 교체 예정
   const handleFarmerLogin = () => {
-    router.replace('/(farmer-tabs)/home' as any)
+    router.replace('/(farmer-tabs)/index' as any)
   }
 
   const handleUserLogin = () => {
