@@ -228,7 +228,7 @@ const Signup = ({ successJoin }: JoinFormProps) => {
 
   // 이메일 중복 체크 함수
   const checkEmail = async () => {
-    if (joinData.memEmail) {
+    if (!joinData.memEmail) {
       Toast.show({type: "error", text1: "이메일을 입력하세요."});
       return;
     }
@@ -246,7 +246,7 @@ const Signup = ({ successJoin }: JoinFormProps) => {
 
   // 닉네임 중복 체크 함수
   const checkNickname = async () => {
-    if (joinData.memNickname) {
+    if (!joinData.memNickname) {
       Toast.show({type: "error", text1: "닉네임을 입력하세요."});
       return;
     }
@@ -393,21 +393,19 @@ const Signup = ({ successJoin }: JoinFormProps) => {
               </Text>
             )}
             {
-              showPostcode && (
-                <Modal visible={showPostcode} animationType="slide">
-                  <DaumPostcode onSelected={(data) => {
-                      const updateData = {...joinData, memAdd: data.address}
-                      setJoinData(updateData);
-                      validateForm(updateData);
-                      setShowPostcode(false);
-                    }}
-                    onError={() => setShowPostcode(false)} 
-                  />
-                  <TouchableOpacity onPress={() => setShowPostcode(false)}>
-                    <Text>닫기</Text>
-                  </TouchableOpacity>
-                </Modal>
-              )
+              <Modal visible={showPostcode} animationType="slide">
+                <DaumPostcode onSelected={(data) => {
+                    const updateData = {...joinData, memAdd: data.address}
+                    setJoinData(updateData);
+                    validateForm(updateData);
+                    setShowPostcode(false);
+                  }}
+                  onError={() => setShowPostcode(false)} 
+                />
+                <TouchableOpacity onPress={() => setShowPostcode(false)}>
+                  <Text>닫기</Text>
+                </TouchableOpacity>
+              </Modal>
             }
             <TouchableOpacity onPress={() => setShowPostcode(true)}>
               <Text>주소 찾기</Text>
@@ -461,7 +459,7 @@ const Signup = ({ successJoin }: JoinFormProps) => {
           <TouchableOpacity onPress={prevStep}>
             <Text>이전</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={validate}>
             <Text>Sign Up</Text>
           </TouchableOpacity>
         </View>

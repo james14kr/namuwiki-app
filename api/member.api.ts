@@ -28,8 +28,8 @@ export const postEmail = async (memEmail: string) => {
   try {
     const response = await api.post("/members/memEmail", { memEmail });
     return response.data;
-  } catch (e) {
-    console.log("이메일 중복 조회 api 오류", e);
+  } catch (e : any) {
+    console.log("이메일 중복 조회 api 오류", e.response?.status, e.response?.config?.url);
     throw e;
   }
 };
