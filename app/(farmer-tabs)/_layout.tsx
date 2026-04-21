@@ -3,6 +3,7 @@ import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -20,7 +21,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <AntDesign name="home" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <Entypo name="home" size={24} color="black" />
         }}
       />
       <Tabs.Screen
@@ -41,7 +42,7 @@ export default function TabLayout() {
         name="dm"
         options={{
           title: '채팅',
-          tabBarIcon: ({ color }) => <AntDesign name="unordered-list" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <Entypo name="chat" size={24} color="black" />
         }}
       />
       <Tabs.Screen

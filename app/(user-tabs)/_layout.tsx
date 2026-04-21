@@ -5,6 +5,7 @@ import { Colors } from '@/constants/theme'
 import { HapticTab } from '@/components/haptic-tab'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const UserTabLayout = () => {
@@ -21,7 +22,7 @@ const UserTabLayout = () => {
         name="index" 
         options={{ 
           title: '홈', 
-          tabBarIcon: ({ color }) =>  <AntDesign name="home" size={24} color="black" />,
+          tabBarIcon: ({ color }) =>  <Entypo name="home" size={24} color="black" />
         }} 
       />
       <Tabs.Screen 
@@ -35,7 +36,7 @@ const UserTabLayout = () => {
         name="dm" 
         options={{ 
           title: '채팅', 
-          tabBarIcon: ({ color }) => <AntDesign name="unordered-list" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <Entypo name="chat" size={24} color="black" />
         }} 
       />
       <Tabs.Screen 
