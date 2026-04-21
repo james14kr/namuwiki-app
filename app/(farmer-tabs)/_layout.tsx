@@ -41,7 +41,7 @@ export default function TabLayout() {
         name="dm"
         options={{
           title: '채팅',
-          tabBarIcon: ({ color }) => <AntDesign name="wechat" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <AntDesign name="unordered-list" size={24} color="black" />,
         }}
       />
       <Tabs.Screen
