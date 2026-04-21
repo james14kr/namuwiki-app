@@ -1,16 +1,32 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { usePostLogin } from '@/queries/member.queries'
 import { useRouter } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import React, { useState } from 'react'
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 const Login = () => {
 
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const {mutate: login} = usePostLogin()
 
   //임시 로그인 - 나중에 실제 API로 교체 예정
   const handleFarmerLogin = () => {
-    router.replace('/(farmer-tabs)/profile' as any)
+    login(
+      {memEmail: email, memPw: password},
+      {
+        onSuccess: async (response) => {
+          const token = response.headers['authorization']
+          await SecureStore.setItemAsync("token", token)
+          router.replace('/(farmer-tabs)/profile' as any) 
+        },
+        onError: (e) => {
+          console.log("로그인 실패", e)
+        }
+      }
+    )
+    
   }
 
   const handleUserLogin = () => {
