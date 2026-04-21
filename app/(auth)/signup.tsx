@@ -1,5 +1,5 @@
 import Input from "@/components/ui/Input";
-import { usePostJoinData } from "@/queries/member.queries";
+import { usePostEmail, usePostJoinData, usePostNickname } from "@/queries/member.queries";
 import React, { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +28,9 @@ interface JoinFormProps {
 
 const Signup = ({ successJoin }: JoinFormProps) => {
   const usePostJoinDataMutate = usePostJoinData();
+  const usePostEmailMutate = usePostEmail();
+  const usePostNicknameMutate = usePostNickname();
+
   // 페이지 이동
   const [step, setStep] = useState(1);
   // 회원가입 데이터 저장할 state 변수
@@ -223,27 +226,19 @@ const Signup = ({ successJoin }: JoinFormProps) => {
     }
   };
 
-  // 주소 검색
-  const selectAddress = (addrInfo: PostInfo) => {
-    console.log(addrInfo);
-    const updateData = { ...joinData, memAdd: addrInfo.fullAddress };
-    setJoinData(updateData);
-    validateForm(updateData);
-  };
-
   // 이메일 중복 체크 함수
   const checkEmail = async () => {
     if (joinData.memEmail) {
-      errorToast("이메일을 입력하세요.");
+      Toast.show({type: "error", text1: "이메일을 입력하세요."});
       return;
     }
 
-    usePostEmailMutate.mutate(memEmail, {
+    usePostEmailMutate.mutate(joinData.memEmail, {
       onSuccess: (data) => {
-        if (!isNullOrEmpty(data)) {
-          errorToast("사용이 불가능합니다.");
+        if (!data) {
+          Toast.show({type: "error", text1: "사용이 불가능합니다."});
         } else {
-          successToast("사용가능합니다");
+          Toast.show({type: "success", text1: "사용가능합니다"});
         }
       },
     });
@@ -251,17 +246,17 @@ const Signup = ({ successJoin }: JoinFormProps) => {
 
   // 닉네임 중복 체크 함수
   const checkNickname = async () => {
-    if (isNullOrEmpty(memNickname)) {
-      errorToast("닉네임을 입력하세요.");
+    if (joinData.memNickname) {
+      Toast.show({type: "error", text1: "닉네임을 입력하세요."});
       return;
     }
 
-    usePostNicknameMutate.mutate(memNickname, {
+    usePostNicknameMutate.mutate(joinData.memNickname, {
       onSuccess: (data) => {
-        if (!isNullOrEmpty(data)) {
-          errorToast("사용이 불가능합니다.");
+        if (!data) {
+          Toast.show({type: "error", text1: "사용이 불가능합니다."});
         } else {
-          successToast("사용가능합니다");
+          Toast.show({type: "success", text1: "사용가능합니다"});
         }
       },
     });
@@ -303,7 +298,7 @@ const Signup = ({ successJoin }: JoinFormProps) => {
                 {errorMsg.memEmail}
               </Text>
             )}
-            <TouchableOpacity>
+            <TouchableOpacity onPress={checkEmail}>
               <Text>중복확인</Text>
             </TouchableOpacity>
           </View>
@@ -345,7 +340,7 @@ const Signup = ({ successJoin }: JoinFormProps) => {
                 {errorMsg.memNickname}
               </Text>
             )}
-            <TouchableOpacity>
+            <TouchableOpacity onPress={checkNickname}>
               <Text>중복확인</Text>
             </TouchableOpacity>
           </View>
