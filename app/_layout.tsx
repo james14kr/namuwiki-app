@@ -5,11 +5,14 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message'
 
 export const unstable_settings = {
   //앱을 처음 켰을 때 (auth) 즉 로그인 화면부터 시작하도록 설정
   initialRouteName: 'index',
 };
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -29,6 +32,7 @@ export default function RootLayout() {
           
         </Stack>
         <StatusBar style="auto" />
+        <Toast />
       </ThemeProvider>
     </QueryClientProvider>
   );

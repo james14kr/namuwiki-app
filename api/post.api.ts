@@ -1,5 +1,5 @@
 import { type PostLikeResponse, type PostRequest, type PostResponse, type PostUpdateRequest } from "@/types/postType";
-import { api } from "@/utils";
+import { api } from "@/utils/axios";
 
 export const postApi = {
   create: async (dto: PostRequest) => {
