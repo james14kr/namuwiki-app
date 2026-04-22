@@ -47,6 +47,10 @@ const Login = () => {
         <Text style={styles.buttonText}>일반 사용 로그인 (테스트)</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={[styles.button, styles.userButton]} onPress={() => router.push('/(auth)/signup')}>
+        <Text style={styles.buttonText}>회원가입</Text>
+      </TouchableOpacity>
+
     </View>
   )
 }

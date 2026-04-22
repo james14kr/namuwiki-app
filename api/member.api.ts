@@ -1,8 +1,8 @@
 // member 관련 api 모음집!
 
 import type { addAdminParam, MemberData } from "@/types/memberType";
-import { api } from "@/utils";
-import { data } from "react-router-dom";
+import { api } from "@/utils/axios";
+
 
 /**
  *
@@ -28,8 +28,13 @@ export const postEmail = async (memEmail: string) => {
   try {
     const response = await api.post("/members/memEmail", { memEmail });
     return response.data;
-  } catch (e) {
-    console.log("이메일 중복 조회 api 오류", e);
+  } catch (e : any) {
+    console.log("=== 이메일 오류 상세 ===");
+    console.log("status:", e.response?.status);
+    console.log("url:", e.response?.config?.url);
+    console.log("message:", e.message);          
+    console.log("data:", e.response?.data);       
+    console.log("headers:", e.response?.headers); 
     throw e;
   }
 };
