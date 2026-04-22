@@ -1,6 +1,6 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { getUserEmail } from '@/utils/auth';
+import { getUserEmail, getUserNickName } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
 import { FarmItem } from '@/types/farmType';
 import { useRouter } from 'expo-router';
@@ -14,12 +14,12 @@ const Farm = () => {
 
   //1. farmerEmail 상태 선언
   const [farmerEmail, setFarmerEmail] = useState<string | null>(null);
+  const [nickName, setNickname] = useState<string | null>(null);
 
   //2. 컴포넌트 마운트 시 이메일 불러오기
   useEffect(() => {
-    getUserEmail().then((email) => {
-      setFarmerEmail(email);
-    });
+    getUserEmail().then((email) => {setFarmerEmail(email)});
+    getUserNickName().then((name) => setNickname(name))
   }, []);
 
   useFocusEffect(
@@ -39,6 +39,11 @@ const Farm = () => {
 
   return (
     <View style={styles.container}>
+
+      <Text style={styles.header}>
+        {nickName}님의 농장 목록입니다
+      </Text>
+
       <FlatList
         contentContainerStyle={{padding: 16}}
         ItemSeparatorComponent={() => <View style={{height: 12}}/>}
@@ -70,6 +75,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f6f0',  // 연한 녹색 배경
+    marginTop: 60
+  },
+  header: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d4a1e',
+    padding: 16,
+    paddingBottom: 8
   },
   card: {
     backgroundColor: '#ffffff',
