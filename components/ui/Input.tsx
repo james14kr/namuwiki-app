@@ -1,26 +1,40 @@
-import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
+import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
 import React, { useState } from 'react'
-
 
 type InputProps = TextInputProps & {
   label?: string
   isPw?: boolean
 }
 
-const Input = ({label, isPw=false, ...props}: InputProps) => {
+const Input = ({ label, isPw = false, ...props }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   return (
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
-      <TextInput
-        style={[styles.input, isFocused && styles.focused]}
-        secureTextEntry={isPw}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => {setIsFocused(false)}}
-        placeholderTextColor="#9DB09D"
-        {...props}
-      />
+      <View style={styles.wrap}>
+        <TextInput
+          style={[
+            styles.input,
+            isFocused && styles.focused,
+            isPw && styles.inputWithEye,
+          ]}
+          secureTextEntry={isPw && !showPw}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholderTextColor="#9DB09D"
+          {...props}
+        />
+        {isPw && (
+          <Pressable
+            onPress={() => setShowPw((prev) => !prev)}
+            style={styles.eyeBtn}
+          >
+            <Text style={styles.eyeText}>{showPw ? '숨김' : '표시'}</Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   )
 }
@@ -35,22 +49,43 @@ const styles = StyleSheet.create({
     color: '#2C3E2C',
     letterSpacing: 0.1,
   },
+  wrap: {
+    position: 'relative',
+  },
   input: {
     fontSize: 15,
-    height: 46,
+    height: 48,
     borderWidth: 1.5,
     borderColor: '#C4D9C4',
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAFCFA',
     paddingHorizontal: 14,
     color: '#2C3E2C',
   },
+  inputWithEye: {
+    paddingRight: 58,
+  },
   focused: {
     borderColor: '#6A9469',
+    backgroundColor: '#FFFFFF',
     shadowColor: '#6A9469',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
     elevation: 2,
-  }
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eyeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#7A9A7A',
+  },
 })
