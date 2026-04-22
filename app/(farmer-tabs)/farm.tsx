@@ -26,12 +26,16 @@ const Farm = () => {
 
   return (
     <FlatList
+      style={styles.container}
+      contentContainerStyle={{padding: 16}}
+      ItemSeparatorComponent={() => <View style={{height: 12}}/>}
       data={data}
       keyExtractor={(item) => item.farmId.toString()}
       renderItem={({item}: {item: FarmItem}) => (
-        <View>
-          <Text>{item.farmName}</Text>
-          <Text>{item.farmAddr}</Text>
+        <View style={styles.card}>
+          <Text style={styles.farmName}>🌾{item.farmName}</Text>
+          <Text style={styles.farmAddr}>{item.farmAddr}</Text>
+          <Text style={styles.farmDesc}>{item.farmDesc}</Text>
         </View>
       )}  
     />
@@ -40,4 +44,37 @@ const Farm = () => {
 
 export default Farm
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f6f0',  // 연한 녹색 배경
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    borderBottomWidth: 4,
+    borderBottomColor: '#4CAF50',  // 초록 포인트 라인
+    // 그림자
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  farmName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d4a1e',  // 짙은 녹색
+    marginBottom: 6,
+  },
+  farmAddr: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  farmDesc: {
+    fontSize: 13,
+    color: '#999',
+  },
+})
