@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FlatList, StyleSheet } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
@@ -18,6 +18,15 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+
+      
+      <Pressable>
+        <Text>게시글 등록</Text>
+      </Pressable>
+
+
+
+
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id.toString()}

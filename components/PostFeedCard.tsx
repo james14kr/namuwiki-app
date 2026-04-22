@@ -3,7 +3,7 @@ import {
   View,
   Text,
   Image,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
 } from 'react-native'
 import { useRouter } from 'expo-router'
@@ -75,7 +75,7 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
     }
   }
 
-  // 이미지 클릭 → 상세 이동
+  // 이미지 클릭 상세 이동
   const handleImagePress = () => {
     router.push(`/post/${post.id}` as any)
   }
@@ -84,7 +84,7 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
     <View style={styles.card}>
 
       {/* 이미지 + 프사/닉네임 겹치기 */}
-      <TouchableOpacity onPress={handleImagePress} activeOpacity={0.9}>
+      <Pressable onPress={handleImagePress} activeOpacity={0.9}>
         <View style={styles.imageWrapper}>
           {imageUrl ? (
             <Image
@@ -111,14 +111,14 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
             <Text style={styles.nickname}>{post.memNickname ?? '알 수 없음'}</Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
       {/* 제목 + 더보기 */}
       <View style={styles.titleRow}>
         <Text style={styles.title} numberOfLines={1}>{post.title}</Text>
-        <TouchableOpacity onPress={() => setExpanded((prev) => !prev)}>
+        <Pressable onPress={() => setExpanded((prev) => !prev)}>
           <Text style={styles.moreBtn}>{expanded ? '접기' : '더보기'}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* 더보기 펼쳤을 때 본문 */}
@@ -131,7 +131,7 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
 
       {/* 좋아요 + 댓글수 */}
       <View style={styles.footerRow}>
-        <TouchableOpacity style={styles.footerItem} onPress={handleLike}>
+        <Pressable style={styles.footerItem} onPress={handleLike}>
           
           <Entypo 
             name={liked ? 'heart' : 'heart-outlined'} 
@@ -139,15 +139,15 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
             color={liked ? '#e74c3c' : '#888'} 
           />
           <Text style={styles.footerCount}>{likeCount}</Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
+        <Pressable
           style={styles.footerItem}
           onPress={handleImagePress}
         >
           <Ionicons name='chatbubble-outline' size={20} color='#888' />
           <Text style={styles.footerCount}>{post.commentCount ?? 0}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
     </View>
