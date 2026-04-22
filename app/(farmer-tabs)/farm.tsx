@@ -5,6 +5,8 @@ import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
 import { FarmItem } from '@/types/farmType';
 import { useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useFocusEffect } from 'expo-router'
+import { useCallback } from 'react'
 
 const Farm = () => {
 
@@ -20,8 +22,14 @@ const Farm = () => {
     });
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+    },[])
+  )
+
   //3. 농장 목록 조회 흑
-  const {data, isLoading} = useGetMyFarmList(farmerEmail ?? "");
+  const {data, isLoading, refetch} = useGetMyFarmList(farmerEmail ?? "");
 
   //4. 로딩 처리
   if(isLoading) return <Text>로딩 중...</Text>
