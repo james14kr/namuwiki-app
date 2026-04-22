@@ -31,8 +31,8 @@ export default function RootLayout() {
           
         </Stack>
         <StatusBar style="auto" />
+        <Toast />
       </ThemeProvider>
-      <Toast />
     </QueryClientProvider>
   );
 }
