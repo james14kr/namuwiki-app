@@ -1,4 +1,4 @@
-import { api } from "@/utils";
+import { api } from "@/utils/axios";
 
 //팔로우
 export const postFollow = async (data : {followerEmail : string; farmerEmail : string}) => {
