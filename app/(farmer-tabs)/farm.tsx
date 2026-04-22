@@ -1,10 +1,15 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { getUserEmail } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
 import { FarmItem } from '@/types/farmType';
+import { useRouter } from 'expo-router';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const Farm = () => {
+
+  const router = useRouter()
+
   //1. farmerEmail 상태 선언
   const [farmerEmail, setFarmerEmail] = useState<string | null>(null);
 
@@ -25,20 +30,29 @@ const Farm = () => {
   if(!data||data.length === 0) return <Text>등록된 농장이 없습니다.</Text>
 
   return (
-    <FlatList
-      style={styles.container}
-      contentContainerStyle={{padding: 16}}
-      ItemSeparatorComponent={() => <View style={{height: 12}}/>}
-      data={data}
-      keyExtractor={(item) => item.farmId.toString()}
-      renderItem={({item}: {item: FarmItem}) => (
-        <View style={styles.card}>
-          <Text style={styles.farmName}>🌾{item.farmName}</Text>
-          <Text style={styles.farmAddr}>{item.farmAddr}</Text>
-          <Text style={styles.farmDesc}>{item.farmDesc}</Text>
-        </View>
-      )}  
-    />
+    <View style={styles.container}>
+      <FlatList
+        contentContainerStyle={{padding: 16}}
+        ItemSeparatorComponent={() => <View style={{height: 12}}/>}
+        data={data}
+        keyExtractor={(item) => item.farmId.toString()}
+        renderItem={({item}: {item: FarmItem}) => (
+          <View style={styles.card}>
+            <Text style={styles.farmName}>🌾{item.farmName}</Text>
+            <Text style={styles.farmAddr}>{item.farmAddr}</Text>
+            <Text style={styles.farmDesc}>{item.farmDesc}</Text>
+          </View>
+        )}  
+      />
+
+      <Pressable
+        style={({pressed}) => [styles.regBtn, pressed && styles.pressed]}
+
+        onPress={e => router.push('../farm/register')}
+      >
+        <AntDesign name="plus" size={24} color="white" />
+      </Pressable>
+    </View>
   )
 }
 
@@ -77,4 +91,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#999',
   },
+  regBtn: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#4CAF50',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  pressed: {
+    opacity: 0.8
+  }
 })
