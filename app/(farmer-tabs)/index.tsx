@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
 import PostFeedCard from '@/components/PostFeedCard'
-import { useRouter } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 
 const Home = () => {
   const router = useRouter();
   const [posts, setPosts] = useState<PostResponse[]>([]);
 
-  useEffect(() => {
-    const loadPosts = async () => {
-      const data = await postApi.getAll()
-      setPosts(data)
-    }
-    loadPosts()
-  }, [])
+
+
+  useFocusEffect(
+    useCallback(()=>{
+      const loadPosts = async () => {
+        const data = await postApi.getAll()
+        setPosts(data)
+      }
+      loadPosts()
+    },[])
+  )
+
 
   return (
     <SafeAreaView style={styles.container}>
