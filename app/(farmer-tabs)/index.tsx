@@ -5,6 +5,7 @@ import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
 import PostFeedCard from '@/components/PostFeedCard'
 import { useRouter } from 'expo-router'
+import { AntDesign } from '@expo/vector-icons'
 
 const Home = () => {
   const router = useRouter();
@@ -21,19 +22,6 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
 
-      
-      <Pressable
-        style={styles.registerBtn}
-        onPress={()=>router.push(`/post/postRegister` as any)}
-      >
-        <Text
-          style={styles.registerText}
-        >+</Text>
-      </Pressable>
-
-
-
-
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id.toString()}
@@ -45,6 +33,15 @@ const Home = () => {
           />
         )}
       />
+
+      <Pressable
+      style={({pressed}) => [styles.regBtn, pressed && styles.pressed]}
+
+        onPress={e => router.push('/post/postRegister')}
+      >
+        <AntDesign name="plus" size={24} color="white" />
+      </Pressable>
+
     </SafeAreaView>
   )
 }
@@ -70,5 +67,18 @@ const styles = StyleSheet.create({
     fontWeight : 'bold',
     fontSize : 30
   },
-  
+  regBtn: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#4CAF50',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  pressed: {
+    opacity: 0.8
+  }
 })
