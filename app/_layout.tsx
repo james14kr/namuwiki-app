@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -29,6 +29,7 @@ export default function RootLayout() {
           <Stack.Screen name='post' options={{headerShown: false}}/>
           <Stack.Screen name='dm/[roomId]' options={{headerShown: false}}/>
 
+          <Stack.Screen name='farm/register' options={{headerShown: false}}/>
           
         </Stack>
         <StatusBar style="auto" />

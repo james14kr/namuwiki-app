@@ -1,9 +1,15 @@
 import * as SecureStore from 'expo-secure-store';
+import {jwtDecode} from 'jwt-decode';
 
-export const decodeToken = (token: string) => {
+interface CustomJwtPayload {
+  sub?: string;
+  role?: string;
+  memNickname: string;
+}
+
+export const decodeToken = (token: string): CustomJwtPayload | null => {
   try {
-    const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
+    return jwtDecode<CustomJwtPayload>(token)
   } catch {
     return null;
   }
@@ -26,3 +32,10 @@ export const getUserEmail = async (): Promise<string | null> => {
   const decoded = decodeToken(token.replace("Bearer ", ""));
   return decoded?.sub ?? null;
 };
+
+export const getUserNickName = async (): Promise<string | null> => {
+  const token = await SecureStore.getItemAsync("token")
+  if(!token) return null;
+  const decoded = decodeToken(token.replace("Bearer ", ""));
+  return decoded?.memNickname ?? null;
+}
