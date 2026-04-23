@@ -61,7 +61,7 @@ const Farm = () => {
       <Pressable
         style={({pressed}) => [styles.regBtn, pressed && styles.pressed]}
 
-        onPress={e => router.push('../farm/register')}
+        onPress={e => router.push('/(farmer-tabs)/farm/register')}
       >
         <AntDesign name="plus" size={24} color="white" />
       </Pressable>
