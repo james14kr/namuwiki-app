@@ -50,11 +50,17 @@ const Farm = () => {
         data={data}
         keyExtractor={(item) => item.farmId.toString()}
         renderItem={({item}: {item: FarmItem}) => (
-          <View style={styles.card}>
+          <Pressable
+            style={({pressed}) => [styles.card, pressed && {opacity: 0.8}]}
+            onPress={() => router.push({
+              pathname: '/(farmer-tabs)/farm/[farmId]',
+              params: {farmId: item.farmId}
+            })}
+          >
             <Text style={styles.farmName}>{item.farmName}</Text>
             <Text style={styles.farmAddr}>{item.farmAddr}</Text>
             <Text style={styles.farmDesc}>{item.farmDesc}</Text>
-          </View>
+          </Pressable>
         )}  
       />
 
