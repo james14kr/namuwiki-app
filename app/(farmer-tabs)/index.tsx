@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
 import PostFeedCard from '@/components/PostFeedCard'
+import { useRouter } from 'expo-router'
 
 const Home = () => {
-  const [posts, setPosts] = useState<PostResponse[]>([])
+  const router = useRouter();
+  const [posts, setPosts] = useState<PostResponse[]>([]);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -20,8 +22,13 @@ const Home = () => {
     <SafeAreaView style={styles.container}>
 
       
-      <Pressable>
-        <Text>게시글 등록</Text>
+      <Pressable
+        style={styles.registerBtn}
+        onPress={()=>router.push(`/post/postRegister` as any)}
+      >
+        <Text
+          style={styles.registerText}
+        >+</Text>
       </Pressable>
 
 
@@ -49,4 +56,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  registerBtn:{
+    alignSelf : 'flex-start',
+    margin : 12,
+    backgroundColor : '#4CAF50',
+    padding : 20,
+    paddingVertical : 6,
+    borderRadius : 50
+
+  },
+  registerText:{
+    color : 'white',
+    fontWeight : 'bold',
+    fontSize : 30
+  },
+  
 })
