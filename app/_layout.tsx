@@ -26,8 +26,9 @@ export default function RootLayout() {
           <Stack.Screen name="(farmer-tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(user-tabs)" options={{ headerShown: false }} />
           <Stack.Screen name='farm/[farmId]' options={{headerShown: false}}/>
-          <Stack.Screen name='post/[postId]' options={{headerShown: false}}/>
+          <Stack.Screen name='post' options={{headerShown: false}}/>
           <Stack.Screen name='dm/[roomId]' options={{headerShown: false}}/>
+
           <Stack.Screen name='farm/register' options={{headerShown: false}}/>
           
         </Stack>
