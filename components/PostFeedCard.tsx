@@ -48,25 +48,36 @@ const formatDate = (dateStr: string): string => {
 
 interface Props {
   post: PostResponse
-  initialLiked?: boolean
-  initialLikeCount?: number
 }
 
-const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Props) => {
+const PostFeedCard = ({ post }: Props) => {
   const router = useRouter()
   const imageUrl = getFirstImageUrl(post.content)
   const textContent = getTextContent(post.content)
 
-  const [liked, setLiked] = useState(initialLiked)
-  const [likeCount, setLikeCount] = useState(initialLikeCount)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
   const [expanded, setExpanded] = useState(false)
 
   // 자신이 쓴 게시물말 수정 삭제 권한
   const [currentEmail, setCurrentEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    getCurrentUserEmail().then(setCurrentEmail)
-  }, [])
+    const loadLikeStatus = async () => {
+      try {
+        // 이메일 가져오기
+        const email = await getCurrentUserEmail()
+        setCurrentEmail(email)
+        // 실제 좋아요 상태 API 조회
+        const likeData = await postApi.getLikeStatus(post.id, email ?? '')
+        setLiked(likeData.liked)
+        setLikeCount(likeData.likeCount)
+      } catch {
+        // 실패해도 0 유지
+      }
+    }
+    loadLikeStatus()
+  }, [post.id])
 
 
 
