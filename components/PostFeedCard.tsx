@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -11,11 +11,9 @@ import { AntDesign, Ionicons } from '@expo/vector-icons'
 import type { PostResponse } from '@/types/postType'
 import { postApi } from '@/api/post.api'
 import Entypo from '@expo/vector-icons/Entypo';
+import { getCurrentUserEmail } from '@/utils/auth1'
 
 
-
-// 임시 이메일 - 로그인 연동 후 교체
-const TEMP_EMAIL = 'user1'
 
 // content JSON에서 첫 번째 이미지 URL 추출
 const getFirstImageUrl = (content: string): string | null => {
@@ -63,10 +61,19 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
   const [likeCount, setLikeCount] = useState(initialLikeCount)
   const [expanded, setExpanded] = useState(false)
 
+  // 자신이 쓴 게시물말 수정 삭제 권한
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    getCurrentUserEmail().then(setCurrentEmail)
+  }, [])
+
+
+
   // 좋아요 토글
   const handleLike = async () => {
     try {
-      await postApi.toggleLike(post.id, TEMP_EMAIL)
+      await postApi.toggleLike(post.id, currentEmail ?? '')
       const newLiked = !liked
       setLiked(newLiked)
       setLikeCount((prev) => prev + (newLiked ? 1 : -1))
@@ -84,7 +91,7 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
     <View style={styles.card}>
 
       {/* 이미지 + 프사/닉네임 겹치기 */}
-      <Pressable onPress={handleImagePress} activeOpacity={0.9}>
+      <Pressable onPress={handleImagePress}>
         <View style={styles.imageWrapper}>
           {imageUrl ? (
             <Image

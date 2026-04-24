@@ -1,6 +1,6 @@
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'  // 이미지 선택 import
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native'
 import Input from '@/components/ui/Input'
@@ -8,11 +8,11 @@ import { useRouter } from 'expo-router'
 import { postApi } from '@/api/post.api'
 import { api } from '@/utils/axios'
 import * as ImageManipulator from 'expo-image-manipulator'
+import { getCurrentUserEmail } from '@/utils/auth1'
 
 
 
-// 임시 이메일
-const TEMP_EMAIL = 'farmer1'
+
 
 
 const PostRegister = () => {
@@ -25,6 +25,14 @@ const PostRegister = () => {
   const [loading, setLoading] = useState(false)
   // 선택된 이미지 로컬 uri 목록
   const [images, setImages] = useState<string[]>([])
+
+// 자신이 쓴 게시물말 수정 삭제 권한
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    getCurrentUserEmail().then(setCurrentEmail)
+  }, [])
+
 
 
 //////////     이미지     ////////////////////////
@@ -199,7 +207,7 @@ const PostRegister = () => {
     await postApi.create({
       title,
       content: contentJson,
-      memEmail: TEMP_EMAIL,
+      memEmail: currentEmail,
     })
 
     Alert.alert('완료', '게시글이 등록되었습니다.', [
