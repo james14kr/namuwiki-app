@@ -255,9 +255,9 @@ const Login = () => {
                   onChangeText={(value) => handleLoginData("memPw", value)}
                 />
               </View>
-              <TouchableOpacity style={styles.forgotWrap}>
+              {/* <TouchableOpacity style={styles.forgotWrap}>
                 <Text style={styles.forgotText}>비밀번호를 잊으셨나요?</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </Animated.View>
 
             {/* Login 버튼 — 펄스 애니메이션 */}

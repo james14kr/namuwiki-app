@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__notionApi__API-get-self",
+      "mcp__notionApi__API-post-search",
+      "mcp__notionApi__API-post-page",
+      "mcp__notionApi__API-patch-block-children"
+    ]
+  }
+}
