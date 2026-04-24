@@ -16,7 +16,7 @@ export const decodeToken = (token: string): CustomJwtPayload | null => {
 };
 
 export const getUserRole = async (): Promise<string | null> => {
-  const token = await SecureStore.getItemAsync("token");
+  const token = await SecureStore.getItemAsync("accessToken");
   if (!token) return null;
   const decoded = decodeToken(token.replace("Bearer ", ""));
   return decoded?.role ?? null;
@@ -27,14 +27,14 @@ export const isAdmin = async (): Promise<boolean> => {
 };
 
 export const getUserEmail = async (): Promise<string | null> => {
-  const token = await SecureStore.getItemAsync("token");
+  const token = await SecureStore.getItemAsync("accessToken");
   if (!token) return null;
   const decoded = decodeToken(token.replace("Bearer ", ""));
   return decoded?.sub ?? null;
 };
 
 export const getUserNickName = async (): Promise<string | null> => {
-  const token = await SecureStore.getItemAsync("token")
+  const token = await SecureStore.getItemAsync("accessToken")
   if(!token) return null;
   const decoded = decodeToken(token.replace("Bearer ", ""));
   return decoded?.memNickname ?? null;
