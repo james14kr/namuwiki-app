@@ -32,9 +32,7 @@ const Home = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <PostFeedCard
-            post={item}
-            initialLiked={false}
-            initialLikeCount={0}
+            post={item}            
           />
         )}
       />

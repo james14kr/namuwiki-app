@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -11,11 +11,9 @@ import { AntDesign, Ionicons } from '@expo/vector-icons'
 import type { PostResponse } from '@/types/postType'
 import { postApi } from '@/api/post.api'
 import Entypo from '@expo/vector-icons/Entypo';
+import { getCurrentUserEmail } from '@/utils/auth1'
 
 
-
-// 임시 이메일 - 로그인 연동 후 교체
-const TEMP_EMAIL = 'user1'
 
 // content JSON에서 첫 번째 이미지 URL 추출
 const getFirstImageUrl = (content: string): string | null => {
@@ -50,23 +48,43 @@ const formatDate = (dateStr: string): string => {
 
 interface Props {
   post: PostResponse
-  initialLiked?: boolean
-  initialLikeCount?: number
 }
 
-const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Props) => {
+const PostFeedCard = ({ post }: Props) => {
   const router = useRouter()
   const imageUrl = getFirstImageUrl(post.content)
   const textContent = getTextContent(post.content)
 
-  const [liked, setLiked] = useState(initialLiked)
-  const [likeCount, setLikeCount] = useState(initialLikeCount)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
   const [expanded, setExpanded] = useState(false)
+
+  // 자신이 쓴 게시물말 수정 삭제 권한
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadLikeStatus = async () => {
+      try {
+        // 이메일 가져오기
+        const email = await getCurrentUserEmail()
+        setCurrentEmail(email)
+        // 실제 좋아요 상태 API 조회
+        const likeData = await postApi.getLikeStatus(post.id, email ?? '')
+        setLiked(likeData.liked)
+        setLikeCount(likeData.likeCount)
+      } catch {
+        // 실패해도 0 유지
+      }
+    }
+    loadLikeStatus()
+  }, [post.id])
+
+
 
   // 좋아요 토글
   const handleLike = async () => {
     try {
-      await postApi.toggleLike(post.id, TEMP_EMAIL)
+      await postApi.toggleLike(post.id, currentEmail ?? '')
       const newLiked = !liked
       setLiked(newLiked)
       setLikeCount((prev) => prev + (newLiked ? 1 : -1))
@@ -84,7 +102,7 @@ const PostFeedCard = ({ post, initialLiked = false, initialLikeCount = 0 }: Prop
     <View style={styles.card}>
 
       {/* 이미지 + 프사/닉네임 겹치기 */}
-      <Pressable onPress={handleImagePress} activeOpacity={0.9}>
+      <Pressable onPress={handleImagePress}>
         <View style={styles.imageWrapper}>
           {imageUrl ? (
             <Image
