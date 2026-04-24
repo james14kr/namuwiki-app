@@ -1,16 +1,45 @@
-import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import React, { useState } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { useGetSensorData } from '@/queries/sensor/useGetSensorData'
 import { useGetSensorHistory } from '@/queries/sensor/useGetSensorHistory'
 import { SensorHistory } from '@/types/namuType'
+import { LineChart } from 'react-native-gifted-charts'
 
 const Sensor = () => {
   const { cropId } = useLocalSearchParams()
   const numericCropId = Number(cropId)
 
   const { data: sensorData, isLoading } = useGetSensorData(numericCropId)
-  const { data: historyList } = useGetSensorHistory(numericCropId)
+
+  const [activeTab, setActiveTab] = useState<'temp' | 'humidity' | 'soil' | 'lux'>('temp')
+  const [period, setPeriod] = useState<'day'| 'week' | 'month'>('day')
+
+  const getStartDate = (p: 'day' | 'week' | 'month') => {
+    const now = new Date()
+    if(p === 'day') now.setDate(now.getDate() - 1)
+    else if(p === 'week') now.setDate(now.getDate() -7)
+    else now.setMonth(now.getMonth() -1)
+    return now.toISOString().split('T')[0]
+  }
+
+  const limitMap = {day: 100, week: 200, month: 500}
+
+  const { data: historyList } = useGetSensorHistory(
+    numericCropId,
+    limitMap[period],
+    getStartDate(period)
+  )
+
+  const chartData = historyList?.map(item => {
+    const valueMap = {
+      temp: item.tempC,
+      humidity: item.humidity,
+      soil: item.soilMoistureValue,
+      lux: item.ldrValue
+    }
+    return {value: valueMap[activeTab]}
+  }) ?? []
 
   if (isLoading) return <Text>로딩 중...</Text>
 
@@ -79,6 +108,63 @@ const Sensor = () => {
 
       {/* 히스토리 */}
       <Text style={styles.sectionTitle}>📋 측정 히스토리</Text>
+
+      {/* 기간 탭 버튼 */}
+      <View style={styles.periodRow}>
+        {(['day', 'week', 'month'] as const).map(p => {
+          const labelMap = {day: '하루', week: '일주일', month: '한달'}
+          return(
+            <Pressable
+              key={p}
+              style={[styles.periodBtn, period === p && styles.periodBtnActive]}
+              onPress={() => setPeriod(p)}
+            >
+              <Text style={[styles.periodBtnText, period === p && styles.periodBtnTextActive]}>
+                {labelMap[p]}
+              </Text>
+            </Pressable>
+          )
+        })}
+
+      </View>
+
+      {/* 탭 버튼 */}
+      <View style={styles.tabRow}>
+        {(['temp', 'humidity', 'soil', 'lux']as const).map(tab => {
+          const labelMap = { temp: '🌡️온도', humidity: '💧습도', soil: '🌱토양', lux: '☀️조도' }
+          return(
+            <Pressable
+              key={tab}
+              style={[styles.tabBtn, activeTab === tab && styles.tabBtnActive]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[styles.tabBtnText, activeTab === tab && styles.tabBtnTextActive]}>
+                {labelMap[tab]}
+              </Text>
+            </Pressable>
+          )
+        })}
+      </View>
+
+      {/* 차트 */}
+      {chartData.length > 0 ? (
+        <LineChart
+          data={chartData}
+          height={200}
+          color1='#6a9469'
+          thickness={2}
+          hideDataPoints={false}
+          dataPointsColor='#2c4a2c'
+          backgroundColor="#fff"
+          curved
+          yAxisTextStyle={{color: '#888', fontSize: 11}}
+          noOfSections={4}
+          initialSpacing={10}
+        />
+      ) : (
+        <Text style={styles.emptyText}>히스토리 데이터가 없습니다.</Text>
+      )}
+
       <FlatList
         data={historyList}
         keyExtractor={(item, index) => index.toString()}
@@ -219,5 +305,55 @@ const styles = StyleSheet.create({
   historyItem: {
     fontSize: 13,
     color: '#444',
+  },
+  tabRow: {
+  flexDirection: 'row',
+  gap: 8,
+  marginBottom: 12,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    elevation: 1,
+  },
+  tabBtnActive: {
+    backgroundColor: '#6A9469',
+  },
+  tabBtnText: {
+    fontSize: 11,
+    color: '#666',
+  },
+  tabBtnTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  periodRow: {
+  flexDirection: 'row',
+  gap: 8,
+  marginBottom: 12,
+  },
+  periodBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  periodBtnActive: {
+    backgroundColor: '#2C4A2C',
+    borderColor: '#2C4A2C',
+  },
+  periodBtnText: {
+    fontSize: 13,
+    color: '#666',
+  },
+  periodBtnTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 })
