@@ -54,6 +54,11 @@ const Device = () => {
   const {data: deviceList} = useGetMyDevices(farmerEmail ?? '')
   const {mutate: registerDevice} = usePostDeviceRegister()
 
+  const selectedFarmName = farmList?.find((f: FarmItem) => f.farmId === selectedFarmId)?.farmName
+  const filteredDeviceList = selectedFarmId === 0
+    ? []
+    : deviceList?.filter((d: DeviceItem) => d.farmName === selectedFarmName)
+  
   const handleSubmit = () => {
     if(!device.deviceId || device.cropId === 0) return
     registerDevice(device, {
@@ -125,9 +130,11 @@ const Device = () => {
       </Pressable>
 
       {/* 내 기기 등록 */}
-      <Text style={styles.sectionTitle}>📋 내 기기 목록</Text>
+      <Text style={styles.sectionTitle}>
+        📋{selectedFarmName ? `${selectedFarmName} 농장에 연결된 기기 목록` : '내 기기 목록'}
+      </Text>
        <FlatList
-        data={deviceList}
+        data={filteredDeviceList}
         keyExtractor={(item) => item.deviceId}
         renderItem={({item} : {item: DeviceItem}) => <DeviceCard item={item}/>}
         scrollEnabled={false}
