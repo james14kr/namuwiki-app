@@ -55,10 +55,17 @@ const FarmDetail = () => {
         keyExtractor={(item) => item.cropId.toString()}
         renderItem={({item}: {item: CropItem}) => (
           <View style={styles.cropCard}>
-            <View>
-              <Text style={styles.cropName}>{item.cropName}</Text>
-              <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
-            </View>
+            <Pressable
+              onPress={() => router.push({
+                pathname: '/(farmer-tabs)/farm/sensor',
+                params: {cropId: item.cropId}
+              })}
+            >
+              <View>
+                <Text style={styles.cropName}>{item.cropName}</Text>
+                <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
+              </View>
+            </Pressable>
             <Pressable onPress={() => deleteCrop(item.cropId)}>
               <Text style={styles.cropDeleteText}>삭제</Text>
             </Pressable>
