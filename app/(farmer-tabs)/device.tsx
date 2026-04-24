@@ -4,11 +4,12 @@ import { useUnlinkDevice } from '@/queries/device/useUnlinkDevice'
 import { DeviceItem, DeviceRegisterData } from '@/types/deviceType'
 import { getUserEmail } from '@/utils'
 import { useGetCropList } from '@/queries/crop/useGetCropList'
-import { useGetMyCropList } from '@/queries/crop/useGetMyCropList'
 import { useGetMyDevices } from '@/queries/device/useGetMyDevices'
 import { usePostDeviceRegister } from '@/queries/device/usePostDeviceRegister'
 import { CropItem } from '@/types/cropType'
 import Toast from 'react-native-toast-message'
+import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList'
+import { FarmItem } from '@/types/farmType'
 
 const DeviceCard = ({item} : {item: DeviceItem}) => {
   const {mutate: unlinkDevice} = useUnlinkDevice(item.cropId ?? 0)
@@ -39,6 +40,7 @@ const Device = () => {
     cropId: 0,
     farmerEmail: ''
   })
+  const [selectedFarmId, setSelectedFarmId] = useState(0)
 
   useEffect(() => {
     getUserEmail().then((email) => {
@@ -47,7 +49,8 @@ const Device = () => {
     })
   }, [])
 
-  const {data: cropList} = useGetMyCropList(farmerEmail ?? '')
+  const {data: farmList} = useGetMyFarmList(farmerEmail ?? '')
+  const {data: cropList} = useGetCropList(selectedFarmId)
   const {data: deviceList} = useGetMyDevices(farmerEmail ?? '')
   const {mutate: registerDevice} = usePostDeviceRegister()
 
@@ -80,21 +83,42 @@ const Device = () => {
         autoCapitalize='none'
       />
 
-      {/* 농작물 선택 */}
-      <Text style={styles.label}>연결할 농작물 선택</Text>
+      {/* 농장 선택 */}
+      <Text style={styles.label}>농장 선택</Text>
       <View style={styles.cropSelectRow}>
-       {cropList?.map((crop: CropItem) => (
-        <Pressable
-          key={crop.cropId}
-          style={[styles.cropBtn, device.cropId === crop.cropId && styles.cropBtnSelected]}
-          onPress={() => setDevice({...device, cropId: crop.cropId})}
-        >
-          <Text>
-            {crop.cropName}
-          </Text>
-        </Pressable>
-       ))}
+        {farmList?.map((farm: FarmItem) => (
+          <Pressable
+            key={farm.farmId}
+            style={[styles.cropBtn, selectedFarmId === farm.farmId && styles.cropBtnSelected]}
+            onPress={() => {
+              setSelectedFarmId(farm.farmId)
+              setDevice(prev => ({...prev, cropId: 0}))
+            }}
+          >
+            <Text>{farm.farmName}</Text>
+          </Pressable>
+        ))}
       </View>
+
+      {/* 농작물 선택 */}
+      {selectedFarmId !== 0 && (
+        <>
+          <Text style={styles.label}>연결할 농작물 선택</Text>
+          <View style={styles.cropSelectRow}>
+          {cropList?.map((crop: CropItem) => (
+            <Pressable
+              key={crop.cropId}
+              style={[styles.cropBtn, device.cropId === crop.cropId && styles.cropBtnSelected]}
+              onPress={() => setDevice({...device, cropId: crop.cropId})}
+            >
+              <Text>
+                {crop.cropName}
+              </Text>
+            </Pressable>
+          ))}
+          </View>
+        </>
+      )}
 
       <Pressable style={styles.submitBtn} onPress={handleSubmit}>
        <Text style={styles.submitText}>등록하기</Text>
