@@ -50,21 +50,28 @@ const Farm = () => {
         data={data}
         keyExtractor={(item) => item.farmId.toString()}
         renderItem={({item}: {item: FarmItem}) => (
-          <View style={styles.card}>
-            <Text style={styles.farmName}>🌾{item.farmName}</Text>
+          <Pressable
+            style={({pressed}) => [styles.card, pressed && {opacity: 0.8}]}
+            onPress={() => router.push({
+              pathname: '/(farmer-tabs)/farm/[farmId]',
+              params: {farmId: item.farmId}
+            })}
+          >
+            <Text style={styles.farmName}>{item.farmName}</Text>
             <Text style={styles.farmAddr}>{item.farmAddr}</Text>
             <Text style={styles.farmDesc}>{item.farmDesc}</Text>
-          </View>
+          </Pressable>
         )}  
       />
 
       <Pressable
         style={({pressed}) => [styles.regBtn, pressed && styles.pressed]}
-
-        onPress={e => router.push('../farm/register')}
+        onPress={e => router.push('/(farmer-tabs)/farm/register')}
       >
         <AntDesign name="plus" size={24} color="white" />
       </Pressable>
+
+      
     </View>
   )
 }
@@ -89,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderBottomWidth: 4,
-    borderBottomColor: '#4CAF50',  // 초록 포인트 라인
+    borderBottomColor: '#6A9469',  // 초록 포인트 라인
     // 그림자
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -118,7 +125,7 @@ const styles = StyleSheet.create({
     height: 50,
     bottom: 30,
     right: 20,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center'

@@ -18,10 +18,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { commentApi } from '@/api/comment.api'
 import type { CommentResponse } from '@/types/commentType'
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { getCurrentUserEmail } from '@/utils/auth1'
 
 
-// 임시 이메일 - 로그인 연동 후 교체
-const TEMP_EMAIL = 'user1'
+
 
 // 날짜 포맷
 const formatDate = (dateStr: string): string => {
@@ -74,6 +74,14 @@ export default function PostDetail() {
   // 댓글
   const [comments, setComments] = useState<CommentResponse[]>([])
 
+  // 자신이 쓴 게시물말 수정 삭제 권한
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    getCurrentUserEmail().then(setCurrentEmail)
+  }, [])
+
+
   // 게시글 로드
   useEffect(() => {
     const load = async () => {
@@ -81,7 +89,7 @@ export default function PostDetail() {
         const data = await postApi.getOne(postId)
         setPost(data)
         // 좋아요 상태
-        const likeData = await postApi.getLikeStatus(Number(postId), TEMP_EMAIL)
+        const likeData = await postApi.getLikeStatus(Number(postId), currentEmail ?? '')
         setLiked(likeData.liked)
         setLikeCount(likeData.likeCount)
         // 댓글
@@ -94,12 +102,12 @@ export default function PostDetail() {
       }
     }
     load()
-  }, [postId])
+  }, [postId, currentEmail])
 
   // 좋아요 토글
   const handleLike = async () => {
     try {
-      await postApi.toggleLike(Number(postId), TEMP_EMAIL)
+      await postApi.toggleLike(Number(postId), currentEmail ?? '')
       const newLiked = !liked
       setLiked(newLiked)
       setLikeCount((prev) => prev + (newLiked ? 1 : -1))
@@ -129,7 +137,7 @@ export default function PostDetail() {
 
   // 게시글 수정
   const handleUpdate = ()=>{
-
+    router.push(`/post/postEdit?postId=${postId}` as any)
   }
 
   if (loading) {
@@ -160,7 +168,7 @@ export default function PostDetail() {
     try {
       await commentApi.insertComment({
         postId: Number(postId),
-        memEmail: TEMP_EMAIL,
+        memEmail: currentEmail,
         content: commentInput,
       })
       setCommentInput('')
@@ -249,7 +257,7 @@ export default function PostDetail() {
           </View>
 
           {/* 본인 게시글이면 수정,삭제 버튼 */}
-          {post.memEmail === TEMP_EMAIL && (
+          {post.memEmail === currentEmail && (
             <View style={styles.editDelete}>
               <Pressable style={styles.updateBtn} onPress={handleUpdate}>
                 <AntDesign name="edit" size={18} color="#346739" />
@@ -334,7 +342,7 @@ export default function PostDetail() {
                 )}
 
                 {/* 본인 댓글이면 수정/삭제 */}
-                {comment.memEmail === TEMP_EMAIL && editCommentId !== comment.id && (
+                {comment.memEmail === currentEmail && editCommentId !== comment.id && (
                   <View style={styles.commentActions}>
                     {/* <Pressable onPress={() => {
                       setEditCommentId(comment.id)

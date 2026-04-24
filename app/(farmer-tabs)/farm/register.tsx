@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top'
   },
   submitBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     marginBottom: 16
   },
   addrBtn: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#6A9469',
     padding: 12,
     borderRadius: 8,
     justifyContent: 'center'
