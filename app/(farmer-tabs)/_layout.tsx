@@ -31,7 +31,7 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="plant"
+        name="device"
         options={{
           title: '기기등록',
           tabBarIcon: ({ color }) => <Ionicons name="leaf-sharp" size={24} color={color}/>,
