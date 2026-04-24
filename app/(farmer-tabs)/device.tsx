@@ -8,6 +8,7 @@ import { useGetMyCropList } from '@/queries/crop/useGetMyCropList'
 import { useGetMyDevices } from '@/queries/device/useGetMyDevices'
 import { usePostDeviceRegister } from '@/queries/device/usePostDeviceRegister'
 import { CropItem } from '@/types/cropType'
+import Toast from 'react-native-toast-message'
 
 const DeviceCard = ({item} : {item: DeviceItem}) => {
   const {mutate: unlinkDevice} = useUnlinkDevice(item.cropId ?? 0)
@@ -54,7 +55,14 @@ const Device = () => {
     if(!device.deviceId || device.cropId === 0) return
     registerDevice(device, {
       onSuccess: () => setDevice(prev => ({...prev, deviceId: '', cropId: 0})),
-      onError: (e) => console.log('기기 등록 실패', e)
+      onError: () => {
+        Toast.show({
+          type: 'error',
+          text1: '기기 등록 실패',
+          text2: '기기 ID를 확인해주세요'
+        })
+        setDevice(prev => ({...prev, deviceId: '', cropId: 0}))
+      }
     })
   }
 
