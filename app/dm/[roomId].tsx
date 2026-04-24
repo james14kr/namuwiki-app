@@ -161,7 +161,7 @@ export default function DmRoom() {
                   <View>
                     {showTime && (
                       <Text>
-                        {formatTime(msg.createdAt)}
+                햣         {formatTime(msg.createdAt)}
                       </Text>
                     )}
                     <Text>
