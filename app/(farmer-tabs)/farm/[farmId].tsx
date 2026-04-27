@@ -1,4 +1,4 @@
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, FlatList, Pressable, StyleSheet, Text, View, ImageBackground } from 'react-native'
 import React from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useGetFarmDetail } from '@/queries/farm/useGetFarmDetail';
@@ -6,6 +6,7 @@ import { useGetCropList } from '@/queries/crop/useGetCropList';
 import { useDeleteFarm } from '@/queries/farm/useDeleteFarm';
 import { useDeleteCrop } from '@/queries/farm/useDeleteCrop';
 import { CropItem } from '@/types/cropType';
+import { Ionicons } from '@expo/vector-icons'
 
 const FarmDetail = () => {
 
@@ -36,55 +37,82 @@ const FarmDetail = () => {
   if(farmLoading || cropLoading) return <Text>로딩 중...</Text>
 
   return (
-    <View style={styles.container}>
-      
-      {/* 농장 정보 */}
-      <Text style={styles.farmName}>{farmDetail?.farmName}</Text>
-      <Text style={styles.farmAddr}>{farmDetail?.farmAddr}</Text>
-      <Text style={styles.farmDesc}>{farmDetail?.farmDesc}</Text>
+    <FlatList
+      style={styles.container}
+      data={cropList}
+      numColumns={2}
+      columnWrapperStyle={styles.cropRow}
+      keyExtractor={(item) => item.cropId.toString()}
 
-      <Pressable style={styles.deleteBtn} onPress={handleDeleteFarm}>
-        <Text style={styles.deleteBtnText}>농장 삭제</Text>
-      </Pressable>
-
-      {/* 농작물 목록 */}
-      <Text style={styles.sectionTitle}>🌱 농작물 목록</Text>
-
-      <FlatList
-        data={cropList}
-        keyExtractor={(item) => item.cropId.toString()}
-        renderItem={({item}: {item: CropItem}) => (
-          <View style={styles.cropCard}>
-            <Pressable
-              onPress={() => router.push({
-                pathname: '/(farmer-tabs)/farm/sensor',
-                params: {cropId: item.cropId}
-              })}
-            >
-              <View>
-                <Text style={styles.cropName}>{item.cropName}</Text>
-                <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
-              </View>
-            </Pressable>
-            <Pressable onPress={() => deleteCrop(item.cropId)}>
-              <Text style={styles.cropDeleteText}>삭제</Text>
+      ListHeaderComponent={
+        <>
+          {/* 상단 헤더 */}
+          <View style={styles.topHeader}>
+            <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
+            <Pressable onPress={handleDeleteFarm}>
+              <Text style={styles.deleteBtnText}>🗑 농장 삭제</Text>
             </Pressable>
           </View>
-        )}
-      >
-      </FlatList>
 
-      <Pressable
-        style={styles.registerBtn}
-        onPress={() => router.push({
-          pathname: '/(farmer-tabs)/farm/cropRegister',
-          params: {farmId: numericFarmId}
-        })}
-      >
-        <Text style={styles.registerBtnText}>농작물 등록</Text>
-      </Pressable>
+          {/* 농장 배너 */}
+          <View style={styles.banner}>
+            <View style={styles.bannerOverlay}>
+              <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+              <View style={styles.bannerAddrRow}>
+                <Ionicons name="location-outline" size={13} color="#fff" />
+                <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+              </View>
+            </View>
+          </View>
 
-    </View>
+          {/* 농장 소개 카드 */}
+          <View style={styles.introCard}>
+            <Text style={styles.introTitle}>농장 소개</Text>
+            <Text style={styles.introDesc}>{farmDetail?.farmDesc}</Text>
+          </View>
+
+          {/* 농작물 목록 헤더 */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🌱 농작물 목록</Text>
+            <View style={styles.countBadge}>
+              <Text style={styles.countText}>총 {cropList?.length}개 품목</Text>
+            </View>
+          </View>
+        </>
+      }
+
+      renderItem={({item}: {item: CropItem}) => (
+        <Pressable
+          style={styles.cropCard}
+          onPress={() => router.push({
+            pathname: '/(farmer-tabs)/farm/sensor',
+            params: {cropId: item.cropId}
+          })}
+        >
+          {/* 작물 이미지 자리 (placeholder) */}
+          <View style={styles.cropImgBox}>
+            <Text style={{fontSize: 28}}>🌿</Text>
+          </View>
+          <Text style={styles.cropName}>{item.cropName}</Text>
+          <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
+          <Pressable onPress={() => deleteCrop(item.cropId)}>
+            <Text style={styles.cropDeleteText}>삭제</Text>
+          </Pressable>
+        </Pressable>
+      )}
+
+      ListFooterComponent={
+        <Pressable
+          style={styles.registerBtn}
+          onPress={() => router.push({
+            pathname: '/(farmer-tabs)/farm/cropRegister',
+            params: {farmId: numericFarmId}
+          })}
+        >
+          <Text style={styles.registerBtnText}>농작물 등록</Text>
+        </Pressable>
+      }
+    />
   )
 }
 
@@ -94,91 +122,157 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f6f0',
-    paddingTop: 60,
-    paddingHorizontal: 16,
   },
 
-  // 농장 정보
-  farmName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2C4A2C',
-    marginBottom: 6,
-  },
-  farmAddr: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  farmDesc: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 16,
-  },
-
-  // 농장 삭제 버튼
-  deleteBtn: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#ff4444',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  deleteBtnText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-
-  // 농작물 섹션
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2C4A2C',
-    marginBottom: 12,
-  },
-
-  // 농작물 카드
-  cropCard: {
+  // 상단 헤더
+  topHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 12,
+    backgroundColor: '#f4f6f0',
+  },
+  logo: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2C4A2C',
+  },
+  deleteBtnText: {
+    color: '#ff4444',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
+  // 농장 배너
+  banner: {
+    height: 200,
+    backgroundColor: '#6A9469',
+    justifyContent: 'flex-end',
+  },
+  bannerOverlay: {
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  bannerFarmName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  bannerAddrRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  bannerAddr: {
+    fontSize: 13,
+    color: '#eee',
+  },
+
+  // 농장 소개 카드
+  introCard: {
+    margin: 16,
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    borderLeftWidth: 4,
-    borderLeftColor: '#6A9469',
+    borderRadius: 12,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
   },
-  cropName: {
+  introTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C4A2C',
+    marginBottom: 8,
+  },
+  introDesc: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 20,
+  },
+
+  // 농작물 섹션 헤더
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  sectionTitle: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#2C4A2C',
+  },
+  countBadge: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  countText: {
+    fontSize: 12,
+    color: '#6A9469',
+    fontWeight: '600',
+  },
+
+  // 농작물 그리드
+  cropRow: {
+    paddingHorizontal: 16,
+    gap: 10,
+    marginBottom: 10,
+  },
+  cropCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  cropImgBox: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#f0f7f0',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  cropName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C4A2C',
     marginBottom: 4,
+    textAlign: 'center',
   },
   cropPrice: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#6A9469',
+    marginBottom: 8,
   },
   cropDeleteText: {
     color: '#ff4444',
-    fontSize: 13,
-    fontWeight: 'bold',
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   // 농작물 등록 버튼
   registerBtn: {
     backgroundColor: '#6A9469',
+    margin: 16,
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 30,
   },
   registerBtnText: {
     color: '#fff',
