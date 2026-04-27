@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
@@ -83,26 +83,26 @@ export default function PostDetail() {
 
 
   // 게시글 로드
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await postApi.getOne(postId)
-        setPost(data)
-        // 좋아요 상태
-        const likeData = await postApi.getLikeStatus(Number(postId), currentEmail ?? '')
-        setLiked(likeData.liked)
-        setLikeCount(likeData.likeCount)
-        // 댓글
-        const commentData = await commentApi.selectComment(Number(postId))
-        setComments(commentData)
-      } catch (e) {
-        console.error('게시글 로드 오류', e)
-      } finally {
-        setLoading(false)
+  useFocusEffect(
+    useCallback(() => {
+      const load = async () => {
+        try {
+          const data = await postApi.getOne(postId)
+          setPost(data)
+          const likeData = await postApi.getLikeStatus(Number(postId), currentEmail ?? '')
+          setLiked(likeData.liked)
+          setLikeCount(likeData.likeCount)
+          const commentData = await commentApi.selectComment(Number(postId))
+          setComments(commentData)
+        } catch (e) {
+          console.error('게시글 로드 오류', e)
+        } finally {
+          setLoading(false)
+        }
       }
-    }
-    load()
-  }, [postId, currentEmail])
+      load()
+    }, [postId, currentEmail])
+  )
 
   // 좋아요 토글
   const handleLike = async () => {
