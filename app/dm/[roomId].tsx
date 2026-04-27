@@ -4,11 +4,19 @@ import { ChatMessageDTO } from "@/types/dmType";
 import { getUserEmail } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "@stomp/stompjs";
-import { useLocalSearchParams, useRouter, useSearchParams } from "expo-router/build/hooks";
+import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
 import { useEffect, useRef, useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SockJS from 'sockjs-client'
+import SockJS from "sockjs-client";
 
 const formatTime = (dateStr: string) => {
   if (!dateStr) return "";
@@ -113,78 +121,65 @@ export default function DmRoom() {
   }, [roomId, currentUserEmail]);
 
   return (
-    <SafeAreaView style={{flex : 1, padding : 10}}>
-      <KeyboardAvoidingView 
-        style={{flex : 1}}
+    <SafeAreaView style={{ flex: 1, padding: 10 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <Pressable onPress={() => router.push("/dm")}>
           <Text>채팅방으로 이동</Text>
         </Pressable>
-        <View>
-          {/* 헤더 */}
-          <View>
-            <Text>{opponentNickname} 님과의 채팅방</Text>
-          </View>
-  
-          {/* 메세지 목록 */}
-          <ScrollView 
-            ref={messagesEndRef}
-            contentContainerStyle={{flexGrow : 1}
-          }
-          >
-            {messages.map((msg, index) => {
-              const isMine = msg.senderEmail === currentUserEmail;
-  
-              const prevMsg = messages[index - 1];
-              const showTime =
-                !prevMsg ||
-                formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
-  
-              return (
-                <View key={msg.id}>
-                  {!isMine && (
-                      <View>
-                        {msg.senderProfileImg
-                        ? 
-                        (
-                          <Image source={{uri : msg.senderProfileImg}} />
-                        )
-                        :
-                        (
-                          <Text>
-                            {msg.senderNickname?.[0] ?? ""}
-                          </Text>
-                        )}
-                      </View>
+        {/* 헤더 */}
+
+        <Text>{opponentNickname} 님과의 채팅방</Text>
+
+        {/* 메세지 목록 */}
+        <ScrollView
+          ref={messagesEndRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          {messages.map((msg, index) => {
+            const isMine = msg.senderEmail === currentUserEmail;
+            console.log("msg.sender", msg.senderProfileImg);
+            const prevMsg = messages[index - 1];
+            const showTime =
+              !prevMsg ||
+              formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
+
+            return (
+              <View
+                key={msg.id}
+                style={{ flexDirection: isMine ? "row-reverse" : "row" }}
+              >
+                <View>
+                  {msg.senderProfileImg ? (
+                    <Image
+                      source={{ uri: msg.senderProfileImg }}
+                      style={{ width: 32, height: 32, borderRadius: 16 }}
+                    />
+                  ) : (
+                    <Text>{msg.senderNickname?.[0] ?? ""}</Text>
                   )}
-                  <View>
-                    {showTime && (
-                      <Text>
-                        {formatTime(msg.createdAt)}
-                      </Text>
-                    )}
-                    <Text>
-                      {msg.content}
-                    </Text>
-                  </View>
                 </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-  
-  
+
+                <View>
+                  {showTime && <Text>{formatTime(msg.createdAt)}</Text>}
+                  <Text>{msg.content}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </ScrollView>
         {/* 메시지 입력 */}
-        <View style={{flexDirection : "row", alignItems : "center"}}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Input
-            style={{width: 200}} 
+            style={{ width: 200 }}
             value={inputValue}
-            onChangeText={e => setInputValue(e)}
+            onChangeText={(e) => setInputValue(e)}
             //onKeyPress={}
             placeholder="메시지를 입력하세요."
           />
-  
+
           <Pressable onPress={sendMessage}>
             <Ionicons name="send" size={24} color={"black"} />
           </Pressable>
