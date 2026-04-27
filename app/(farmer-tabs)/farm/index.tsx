@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { getUserEmail, getUserNickName } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
@@ -61,6 +61,12 @@ const Farm = () => {
               params: {farmId: item.farmId}
             })}
           >
+            {item.farmImg ? (
+              <Image source={{uri: item.farmImg}} style={styles.cardImg}/>
+            ) : (
+              <View style={styles.cardImgPlaceholder}/>
+            )}
+
             <Text style={styles.farmName}>{item.farmName}</Text>
 
             <View style={styles.addrRow}>
@@ -169,5 +175,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6A9469',
     fontWeight: '600',
-  }
+  },
+  cardImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  cardImgPlaceholder: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: '#d4e8d4',
+    marginBottom: 10,
+  },
 })

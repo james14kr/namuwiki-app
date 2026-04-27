@@ -55,15 +55,31 @@ const FarmDetail = () => {
           </View>
 
           {/* 농장 배너 */}
-          <View style={styles.banner}>
-            <View style={styles.bannerOverlay}>
-              <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
-              <View style={styles.bannerAddrRow}>
-                <Ionicons name="location-outline" size={13} color="#fff" />
-                <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+          {farmDetail?.farmImg ? (
+            <ImageBackground
+              source={{ uri: farmDetail.farmImg }}
+              style={styles.banner}
+              resizeMode="cover"
+            >
+              <View style={styles.bannerOverlay}>
+                <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+                <View style={styles.bannerAddrRow}>
+                  <Ionicons name="location-outline" size={13} color="#fff" />
+                  <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+                </View>
+              </View>
+            </ImageBackground>
+          ) : (
+            <View style={styles.banner}>
+              <View style={styles.bannerOverlay}>
+                <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+                <View style={styles.bannerAddrRow}>
+                  <Ionicons name="location-outline" size={13} color="#fff" />
+                  <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* 농장 소개 카드 */}
           <View style={styles.introCard}>

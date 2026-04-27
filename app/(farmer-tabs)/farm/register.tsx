@@ -129,12 +129,15 @@ const FarmRegister = () => {
   }
 
   const handleSubmit = async () => {
-    setLoading(false)
+    setLoading(true)
     try{
       let farmImgUrl = ''
       if(image) {
         farmImgUrl = await uploadImageToS3(image)
       }
+
+      console.log('보내는 farmImgUrl:', farmImgUrl)  // ← 여기 추가
+      console.log('보내는 farm 전체:', JSON.stringify({...farm, farmImg: farmImgUrl}))  // ← 여기 추가
 
       registerFarm({...farm, farmImg: farmImgUrl}, {
         onSuccess: () => router.back(),

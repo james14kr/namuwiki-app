@@ -14,6 +14,7 @@ export interface FarmItem{
   farmAddr : string;
   farmDesc : string;
   createDate : string;
+  farmImg: string;
 }
 
 export interface FarmDetail{
@@ -26,4 +27,5 @@ export interface FarmDetail{
   memNickname : string;
   memTel : string;
   memProfileImg : string;
+  farmImg: string;
 }
