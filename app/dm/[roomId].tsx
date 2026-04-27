@@ -12,6 +12,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -30,36 +31,30 @@ const formatTime = (dateStr: string) => {
 
 export default function DmRoom() {
   const router = useRouter();
-
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
   const messagesEndRef = useRef<ScrollView>(null);
   const [opponentNickname, setOpponentNickname] = useState<string>("");
+  const [opponentProfileImg, setOpponentProfileImg] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState<string>("");
   const stompClient = useRef<Client | null>(null);
 
-  // 메시지 목록 하단으로 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollToEnd({ animated: true });
   };
 
-  // 누구와의 채팅방인지
   useEffect(() => {
     if (!roomId || !currentUserEmail) return;
     dmApi.getMyRooms(currentUserEmail).then((rooms) => {
       const room = rooms.find((r) => r.id === Number(roomId));
       if (!room) return;
-      // 내가 sender면 상대는 receiver
-      const nickname =
-        room.senderEmail === currentUserEmail
-          ? room.receiverNickname
-          : room.senderNickname;
-      setOpponentNickname(nickname);
+      const isMe = room.senderEmail === currentUserEmail;
+      setOpponentNickname(isMe ? room.receiverNickname : room.senderNickname);
+      setOpponentProfileImg(isMe ? (room.receiverProfileImg ?? null) : (room.senderProfileImg ?? null));
     });
   }, [roomId, currentUserEmail]);
 
-  // 기존 메시지 불러오기
   useEffect(() => {
     if (!roomId || !currentUserEmail) return;
     dmApi.getMessages(Number(roomId), currentUserEmail).then((data) => {
@@ -67,7 +62,6 @@ export default function DmRoom() {
     });
   }, [roomId, currentUserEmail]);
 
-  // 메시지 보낼 때 마다 스크롤 내리기
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -76,7 +70,6 @@ export default function DmRoom() {
     getUserEmail().then((email) => setCurrentUserEmail(email));
   }, []);
 
-  // 메시지 전송
   const sendMessage = () => {
     if (!inputValue.trim() || !stompClient.current || !currentUserEmail) return;
     stompClient.current.publish({
@@ -91,100 +84,356 @@ export default function DmRoom() {
     setInputValue("");
   };
 
-  //WebSocket 연결
   useEffect(() => {
     if (!roomId || !currentUserEmail) return;
-
     const client = new Client({
       webSocketFactory: () => new SockJS("http://192.168.30.77:8080/api/ws"),
       onConnect: () => {
-        console.log("WebSocket 연결 성공!");
-        // 채팅방 구독
-        console.log("WebSocket 연결 성공~");
         client.subscribe(`/sub/dm/room/${roomId}`, (message) => {
-          console.log("메시지 수신 : ", message.body);
           const newMessage: ChatMessageDTO = JSON.parse(message.body);
-          // prev 방식으로 최신 상태 참조
           setMessages((prev) => [...prev, newMessage]);
         });
       },
-      onDisconnect: () => {
-        console.log("WebSocket 연결 해제!!");
-      },
+      onDisconnect: () => {},
     });
     client.activate();
     stompClient.current = client;
-    // 컴포넌틑 언마운트 시 연결 해제
-    return () => {
-      client.deactivate();
-    };
+    return () => { client.deactivate(); };
   }, [roomId, currentUserEmail]);
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 10 }}>
+    <SafeAreaView style={styles.safe}>
+      {/* 헤더 */}
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+          <Ionicons name="chevron-back" size={24} color="#2C4A2C" />
+        </Pressable>
+
+        <View style={styles.headerCenter}>
+          {opponentProfileImg ? (
+            <Image source={{ uri: opponentProfileImg }} style={styles.headerAvatar} />
+          ) : (
+            <View style={styles.headerAvatarFallback}>
+              <Text style={styles.headerAvatarInitial}>
+                {opponentNickname?.[0]?.toUpperCase() ?? "?"}
+              </Text>
+            </View>
+          )}
+          <Text style={styles.headerName} numberOfLines={1}>
+            {opponentNickname || "..."}
+          </Text>
+        </View>
+
+        <View style={styles.headerRight} />
+      </View>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <Pressable onPress={() => router.push("/dm")}>
-          <Text>채팅방으로 이동</Text>
-        </Pressable>
-        {/* 헤더 */}
-
-        <Text>{opponentNickname} 님과의 채팅방</Text>
-
-        {/* 메세지 목록 */}
+        {/* 메시지 목록 */}
         <ScrollView
           ref={messagesEndRef}
-          contentContainerStyle={{ flexGrow: 1 }}
+          style={styles.messagesList}
+          contentContainerStyle={styles.messagesContent}
+          showsVerticalScrollIndicator={false}
         >
           {messages.map((msg, index) => {
             const isMine = msg.senderEmail === currentUserEmail;
-            console.log("msg.sender", msg.senderProfileImg);
             const prevMsg = messages[index - 1];
             const showTime =
-              !prevMsg ||
-              formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
+              !prevMsg || formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
+            const showAvatar =
+              !isMine &&
+              (index === 0 || messages[index - 1].senderEmail !== msg.senderEmail);
 
             return (
               <View
                 key={msg.id}
-                style={{ flexDirection: isMine ? "row-reverse" : "row" }}
+                style={[
+                  styles.messageRow,
+                  isMine ? styles.messageRowMine : styles.messageRowTheirs,
+                ]}
               >
-                <View>
-                  {msg.senderProfileImg ? (
-                    <Image
-                      source={{ uri: msg.senderProfileImg }}
-                      style={{ width: 32, height: 32, borderRadius: 16 }}
-                    />
-                  ) : (
-                    <Text>{msg.senderNickname?.[0] ?? ""}</Text>
-                  )}
-                </View>
+                {/* 상대방 아바타 */}
+                {!isMine && (
+                  <View style={styles.msgAvatarWrap}>
+                    {showAvatar ? (
+                      msg.senderProfileImg ? (
+                        <Image
+                          source={{ uri: msg.senderProfileImg }}
+                          style={styles.msgAvatar}
+                        />
+                      ) : (
+                        <View style={styles.msgAvatarFallback}>
+                          <Text style={styles.msgAvatarInitial}>
+                            {msg.senderNickname?.[0]?.toUpperCase() ?? "?"}
+                          </Text>
+                        </View>
+                      )
+                    ) : (
+                      <View style={styles.msgAvatarPlaceholder} />
+                    )}
+                  </View>
+                )}
 
-                <View>
-                  {showTime && <Text>{formatTime(msg.createdAt)}</Text>}
-                  <Text>{msg.content}</Text>
+                {/* 말풍선 + 시간 */}
+                <View
+                  style={[
+                    styles.bubbleWrap,
+                    isMine ? styles.bubbleWrapMine : styles.bubbleWrapTheirs,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.bubble,
+                      isMine ? styles.bubbleMine : styles.bubbleTheirs,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.bubbleText,
+                        isMine ? styles.bubbleTextMine : styles.bubbleTextTheirs,
+                      ]}
+                    >
+                      {msg.content}
+                    </Text>
+                  </View>
+                  {showTime && (
+                    <Text
+                      style={[
+                        styles.timeText,
+                        isMine ? styles.timeTextMine : styles.timeTextTheirs,
+                      ]}
+                    >
+                      {formatTime(msg.createdAt)}
+                    </Text>
+                  )}
                 </View>
               </View>
             );
           })}
         </ScrollView>
-        {/* 메시지 입력 */}
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Input
-            style={{ width: 200 }}
-            value={inputValue}
-            onChangeText={(e) => setInputValue(e)}
-            //onKeyPress={}
-            placeholder="메시지를 입력하세요."
-          />
 
-          <Pressable onPress={sendMessage}>
-            <Ionicons name="send" size={24} color={"black"} />
+        {/* 입력창 */}
+        <View style={styles.inputBar}>
+          <Input
+            containerStyle={styles.inputWrap}
+            style={styles.chatInput}
+            value={inputValue}
+            onChangeText={setInputValue}
+            placeholder="메시지를 입력하세요."
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+          />
+          <Pressable
+            onPress={sendMessage}
+            style={({ pressed }) => [styles.sendBtn, pressed && styles.sendBtnPressed]}
+          >
+            <Ionicons name="send" size={18} color="#FFFFFF" />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  // 헤더
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EDF5ED",
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+  },
+  headerCenter: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 4,
+  },
+  headerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  headerAvatarFallback: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#6A9469",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  headerAvatarInitial: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  headerName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1A2E1A",
+    maxWidth: 160,
+  },
+  headerRight: {
+    width: 40,
+  },
+
+  // 메시지 목록
+  messagesList: {
+    flex: 1,
+    backgroundColor: "#F4FAF4",
+  },
+  messagesContent: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  messageRow: {
+    flexDirection: "row",
+    marginBottom: 4,
+    alignItems: "flex-end",
+  },
+  messageRowMine: {
+    justifyContent: "flex-end",
+  },
+  messageRowTheirs: {
+    justifyContent: "flex-start",
+  },
+
+  // 상대방 아바타
+  msgAvatarWrap: {
+    marginRight: 8,
+    alignSelf: "flex-end",
+  },
+  msgAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  msgAvatarFallback: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#8A9E8A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  msgAvatarInitial: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  msgAvatarPlaceholder: {
+    width: 32,
+  },
+
+  // 말풍선
+  bubbleWrap: {
+    maxWidth: "72%",
+  },
+  bubbleWrapMine: {
+    alignItems: "flex-end",
+  },
+  bubbleWrapTheirs: {
+    alignItems: "flex-start",
+  },
+  bubble: {
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  bubbleMine: {
+    backgroundColor: "#6A9469",
+    borderBottomRightRadius: 4,
+  },
+  bubbleTheirs: {
+    backgroundColor: "#FFFFFF",
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E2EDE2",
+    shadowColor: "#2C3E2C",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  bubbleText: {
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  bubbleTextMine: {
+    color: "#FFFFFF",
+  },
+  bubbleTextTheirs: {
+    color: "#1A2E1A",
+  },
+  timeText: {
+    fontSize: 10,
+    color: "#8A9E8A",
+    marginTop: 4,
+  },
+  timeTextMine: {
+    alignSelf: "flex-end",
+  },
+  timeTextTheirs: {
+    alignSelf: "flex-start",
+    marginLeft: 2,
+  },
+
+  // 입력창
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#EDF5ED",
+  },
+  inputWrap: {
+    flex: 1,
+    marginRight: 8,
+  },
+  chatInput: {
+    height: 44,
+    borderRadius: 22,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#6A9469",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#6A9469",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  sendBtnPressed: {
+    backgroundColor: "#587A57",
+    shadowOpacity: 0.15,
+  },
+});
