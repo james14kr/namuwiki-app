@@ -1,22 +1,104 @@
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { FarmRegisterData } from '@/types/farmType'
 import { getUserEmail } from '@/utils/auth'
 import { usePostFarmRegister } from '@/queries/farm/FarmRegister'
 import { useRouter } from 'expo-router'
 import DaumPostcode from 'react-native-daum-postcode'
+import * as ImagePicker from 'expo-image-picker'
+import * as ImageManipulator from 'expo-image-manipulator'
+import { Image, ActivityIndicator } from 'react-native'
+import { api } from '@/utils/axios'
 
 const FarmRegister = () => {
 
   const router = useRouter()
+
+  const [image, setImage] = useState<string>('')
+  const [loading, setLoading] = useState(false)
+
   const [showPostcode, setShowPostcode] = useState(false)
 
   const [farm, setFarm] = useState<FarmRegisterData>({
     farmerEmail: '',
     farmName: '',
     farmAddr: '',
-    farmDesc: ''
+    farmDesc: '',
+    farmImg: ''
   })
+
+  const uploadImageToS3 = async (uri: string): Promise<string> => {
+      
+    // 업로드 전에 리사이징
+    const resized = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1080 } }],  // 가로 1080px로 줄이기
+      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
+    )
+    // resized.uri 를 업로드
+    
+    
+    // 리사이징된 uri 기준으로 파일명, 타입 추출
+    const filename = resized.uri.split('/').pop() ?? 'image.jpg'
+    const contentType = 'image/jpeg'  // 리사이징 후 항상 JPEG
+
+
+
+    // 백엔드에 presigned URL 요청
+    const { data } = await api.post<{ presignedUrl: string; publicUrl: string }>(
+      '/upload/presigned',
+      { folder: 'images', filename, contentType, fileSize: 0 }
+    )
+
+
+    
+    // // 로컬 uri를 blob으로 변환 후 S3에 PUT 요청
+    // const imageBlob = await fetch(uri).then((r) => r.blob())
+    // await axios.put(data.presignedUrl, imageBlob, {
+    //   headers: { 'Content-Type': contentType },
+    //   timeout: 60000,
+    // })
+    // 안쓰는 이유 : 이미지가 깨져보임 
+    // blob으로 변환하는 부분 중 fetch로 로컬 uri를 blob으로 변환하면 제대로 안될때 있다.
+
+
+    // // FormData 방식으로 변환 (RN에서 더 안정적)
+    // const formData = new FormData()
+    //   formData.append('file', {
+    //     uri,
+    //     name: filename,
+    //     type: contentType,
+    //   } as any)
+
+    // // S3에 직접 PUT 요청
+    // await fetch(data.presignedUrl, {
+    //   method: 'PUT',
+    //   headers: { 'Content-Type': contentType },
+    //   body: formData,
+    // })
+    // 게시글 등록 오류남. FormData 방식이 S3랑 안맞기때문. 
+
+
+    // 로컬 이미지를 base64로 읽기
+    const response = await fetch(resized.uri)
+    const blob = await response.blob()
+
+    // S3에 직접 PUT 요청 - axios 대신 fetch 사용
+    const uploadResponse = await fetch(data.presignedUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType,
+      },
+      body: blob,
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error(`S3 업로드 실패: ${uploadResponse.status}`)
+    }
+
+
+    return data.publicUrl
+  }
 
   const {mutate: registerFarm} = usePostFarmRegister()
 
@@ -26,15 +108,43 @@ const FarmRegister = () => {
     })
   }, [])
 
-  const handleSubmit = () => {
-    registerFarm(farm, {
-      onSuccess: () => {
-        router.back()
-      },
-      onError: (e) => {
-        console.log('농장 등록 실패', e)
-      }
+  const handlePickImage = async () => {
+    // 수정
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if(!permission.granted){
+      Alert.alert('권한 필요', '사진 접근 권한이 필요합니다.')
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
+      quality: 0.5,
+      exif: false
     })
+
+    if(!result.canceled){
+      setImage(result.assets[0].uri)
+    }
+  }
+
+  const handleSubmit = async () => {
+    setLoading(false)
+    try{
+      let farmImgUrl = ''
+      if(image) {
+        farmImgUrl = await uploadImageToS3(image)
+      }
+
+      registerFarm({...farm, farmImg: farmImgUrl}, {
+        onSuccess: () => router.back(),
+        onError: (e) => console.log('농장 등록 실패', e)
+      })
+    }catch(e) {
+      Alert.alert('오류', '이미지 업로드에 실패했습니다.')
+    }finally{
+      setLoading(false)
+    }
   }
 
   const handleAddressSelect = (data: any) => {
@@ -81,6 +191,16 @@ const FarmRegister = () => {
         />
       </Modal>
 
+      {/* 농장 이미지 */}
+      <Text style={styles.label}>농장 대표 이미지</Text>
+      <Pressable style={styles.imagePickerBtn} onPress={handlePickImage}>
+        <Text style={styles.imagePickerText}>📷 이미지 선택</Text>
+      </Pressable>
+
+      {image ? (
+        <Image source={{uri: image}} style={styles.previewImage}/>
+      ): null}
+
       {/* 농장 소개 */}
       <Text style={styles.label}>농장 소개</Text>
       <TextInput
@@ -92,8 +212,15 @@ const FarmRegister = () => {
         numberOfLines={4}
       />
 
-      <Pressable style={styles.submitBtn} onPress={handleSubmit}>
-        <Text style={styles.submitText}>농장 등록하기</Text>
+      <Pressable
+        style={[styles.submitBtn, loading && { backgroundColor: '#aaa' }]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        {loading
+          ? <ActivityIndicator color="#fff" />
+          : <Text style={styles.submitText}>농장 등록하기</Text>
+        }
       </Pressable>
     </ScrollView>
   )
@@ -159,5 +286,24 @@ const styles = StyleSheet.create({
   addrBtnText: {
     color: '#fff',
     fontWeight: 'bold'
-  }
+  },
+  imagePickerBtn: {
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  imagePickerText: {
+    color: '#888',
+    fontSize: 14,
+  },
+  previewImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
 })

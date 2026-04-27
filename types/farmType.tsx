@@ -4,6 +4,7 @@ export interface FarmRegisterData {
   farmName : string;
   farmAddr : string;
   farmDesc : string;
+  farmImg: string;
 }
 
 export interface FarmItem{
