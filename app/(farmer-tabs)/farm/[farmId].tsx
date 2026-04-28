@@ -22,12 +22,16 @@ const FarmDetail = () => {
   const handleDeleteFarm = () => {
     Alert.alert(
       '농장 삭제',
-      '농장을 삭제하면 소속 농작물도 모두 삭제됩니다. 삭제하시겠습니까?',
+      '소속 농작물의 기기를 모두 해제한 후 삭제할 수 있습니다. 삭제하시겠습니까?',
       [
         {text: '취소', style: 'cancel'},
-        {text: '삭제', style: 'destructive', onPress: () => {
-          deleteFarm(numericFarmId, {
-            onSuccess: () => router.back()
+        {
+          text: '삭제', 
+          style: 'destructive',
+          onPress: () => {
+            deleteFarm(numericFarmId, {
+            onSuccess: () => router.back(),
+            onError: () => Alert.alert('삭제 실패', '기기가 연결된 농작물이 있습니다. 먼저 기기를 해제해주세요')
           })
         }}
       ]
@@ -114,7 +118,24 @@ const FarmDetail = () => {
           )}
           <Text style={styles.cropName}>{item.cropName}</Text>
           <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
-          <Pressable onPress={() => deleteCrop(item.cropId)}>
+          <Pressable onPress={() => {
+            Alert.alert(
+              '농작물 삭제',
+              '농작물을 삭제하려면 연결된 기기를 먼저 해제해야 합니다. 기기를 삭제하시겠습니까?',
+              [
+                {text: '취소', style: 'cancel'},
+                {
+                  text: '삭제',
+                  style: 'destructive',
+                  onPress: () => {
+                    deleteCrop(item.cropId, {
+                      onError: () => Alert.alert('삭제 실패', '연결된 기기가 있습니다. 먼저 기기를 해제해주세요')
+                    })
+                  }
+                }
+              ]
+            )
+          }}>
             <Text style={styles.cropDeleteText}>삭제</Text>
           </Pressable>
         </Pressable>
