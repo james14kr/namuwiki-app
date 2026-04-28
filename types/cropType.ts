@@ -3,6 +3,7 @@ export interface CropRegisterData {
   cropName : string;
   cropDesc : string;
   cropPrice : number;
+  cropImg: string;
 }
 
 export interface CropItem{
@@ -11,4 +12,5 @@ export interface CropItem{
   cropName : string;
   cropDesc : string;
   cropPrice : number;
+  cropImg : string;
 }
