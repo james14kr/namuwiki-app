@@ -1,17 +1,18 @@
-import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
+import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native'
 import React, { useState } from 'react'
 
 type InputProps = TextInputProps & {
   label?: string
   isPw?: boolean
+  containerStyle?: ViewStyle
 }
 
-const Input = ({ label, isPw = false, ...props }: InputProps) => {
+const Input = ({ label, isPw = false, containerStyle, style, ...props }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
   return (
-    <View>
+    <View style={containerStyle}>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={styles.wrap}>
         <TextInput
@@ -19,6 +20,7 @@ const Input = ({ label, isPw = false, ...props }: InputProps) => {
             styles.input,
             isFocused && styles.focused,
             isPw && styles.inputWithEye,
+            style,
           ]}
           secureTextEntry={isPw && !showPw}
           onFocus={() => setIsFocused(true)}
@@ -57,7 +59,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderWidth: 1.5,
     borderColor: '#C4D9C4',
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: '#FAFCFA',
     paddingHorizontal: 14,
     color: '#2C3E2C',

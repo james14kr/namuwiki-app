@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { getUserEmail, getUserNickName } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useFocusEffect } from 'expo-router'
 import { useCallback } from 'react'
+import { Ionicons } from '@expo/vector-icons'
 
 const Farm = () => {
 
@@ -43,6 +44,9 @@ const Farm = () => {
       <Text style={styles.header}>
         {nickName}님의 농장 목록입니다
       </Text>
+      <Text style={styles.subHeader}>
+        현재 {data.length}개의 농장이 스마트 시스템에 연결되어 있습니다.
+      </Text>
 
       <FlatList
         contentContainerStyle={{padding: 16}}
@@ -57,9 +61,24 @@ const Farm = () => {
               params: {farmId: item.farmId}
             })}
           >
+            {item.farmImg ? (
+              <Image source={{uri: item.farmImg}} style={styles.cardImg}/>
+            ) : (
+              <View style={styles.cardImgPlaceholder}/>
+            )}
+
             <Text style={styles.farmName}>{item.farmName}</Text>
-            <Text style={styles.farmAddr}>{item.farmAddr}</Text>
+
+            <View style={styles.addrRow}>
+              <Ionicons name="location-outline" size={13} color="#888" />
+              <Text style={styles.farmAddr}>{item.farmAddr}</Text>
+            </View>
+
             <Text style={styles.farmDesc}>{item.farmDesc}</Text>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailBtn}>상세보기 &gt;</Text>
+            </View>
           </Pressable>
         )}  
       />
@@ -132,5 +151,42 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8
-  }
+  },
+  subHeader: {
+  fontSize: 13,
+    color: '#888',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  addrRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+  },
+  detailRow: {
+    alignItems: 'flex-end',
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 8,
+  },
+  detailBtn: {
+    fontSize: 13,
+    color: '#6A9469',
+    fontWeight: '600',
+  },
+  cardImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  cardImgPlaceholder: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: '#d4e8d4',
+    marginBottom: 10,
+  },
 })

@@ -4,6 +4,7 @@ export interface FarmRegisterData {
   farmName : string;
   farmAddr : string;
   farmDesc : string;
+  farmImg: string;
 }
 
 export interface FarmItem{
@@ -13,6 +14,7 @@ export interface FarmItem{
   farmAddr : string;
   farmDesc : string;
   createDate : string;
+  farmImg: string;
 }
 
 export interface FarmDetail{
@@ -25,4 +27,5 @@ export interface FarmDetail{
   memNickname : string;
   memTel : string;
   memProfileImg : string;
+  farmImg: string;
 }
