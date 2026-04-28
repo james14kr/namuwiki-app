@@ -7,7 +7,7 @@ export const usePostDeviceRegister = () => {
   return useMutation({
     mutationFn: postDeviceRegister,
     onSuccess : () => {
-      queryClient.invalidateQueries({queryKey: ["cropList"]});
+      queryClient.invalidateQueries({queryKey: ["myDevices"]});
     }
   })
 
