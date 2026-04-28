@@ -36,7 +36,18 @@ const Farm = () => {
   if(isLoading) return <Text>로딩 중...</Text>
 
   //5. 빈 데이터 처리
-  if(!data||data.length === 0) return <Text>등록된 농장이 없습니다.</Text>
+  if(!data || data.length === 0) return (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>🌱 등록된 농장이 없습니다.</Text>
+      <Text style={styles.emptySubText}>아래 + 버튼을 눌러 농장을 등록해보세요.</Text>
+      <Pressable
+        style={({pressed}) => [styles.regBtn, pressed && styles.pressed]}
+        onPress={() => router.push('/(farmer-tabs)/farm/register')}
+      >
+        <AntDesign name="plus" size={24} color="white" />
+      </Pressable>
+    </View>
+  )
 
   return (
     <View style={styles.container}>
@@ -188,5 +199,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#d4e8d4',
     marginBottom: 10,
+  },
+  emptyContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#f4f6f0',
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2d4a1e',
+    marginBottom: 8,
+  },
+  emptySubText: {
+    fontSize: 13,
+    color: '#888',
   },
 })
