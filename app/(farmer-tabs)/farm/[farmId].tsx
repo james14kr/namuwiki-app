@@ -1,4 +1,4 @@
-import { Alert, FlatList, Pressable, StyleSheet, Text, View, ImageBackground } from 'react-native'
+import { Alert, FlatList, Pressable, StyleSheet, Text, View, ImageBackground, Image } from 'react-native'
 import React from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useGetFarmDetail } from '@/queries/farm/useGetFarmDetail';
@@ -105,10 +105,13 @@ const FarmDetail = () => {
             params: {cropId: item.cropId}
           })}
         >
-          {/* 작물 이미지 자리 (placeholder) */}
-          <View style={styles.cropImgBox}>
-            <Text style={{fontSize: 28}}>🌿</Text>
-          </View>
+          {item.cropImg ? (
+            <Image source={{uri: item.cropImg}} style={styles.cropImgBox} />
+          ) : (
+            <View style={styles.cropImgBox}>
+              <Text style={{fontSize:28}}>🌿</Text>
+            </View>
+          )}
           <Text style={styles.cropName}>{item.cropName}</Text>
           <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
           <Pressable onPress={() => deleteCrop(item.cropId)}>
@@ -262,6 +265,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden', 
   },
   cropName: {
     fontSize: 14,
