@@ -1,106 +1,100 @@
-import React, { useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native'
-import { useRouter } from 'expo-router'
-import { AntDesign, Ionicons } from '@expo/vector-icons'
-import type { PostResponse } from '@/types/postType'
-import { postApi } from '@/api/post.api'
-import Entypo from '@expo/vector-icons/Entypo';
-import { getCurrentUserEmail } from '@/utils/auth1'
-
-
+import { dmApi } from "@/api/dm.api";
+import { postApi } from "@/api/post.api";
+import type { PostResponse } from "@/types/postType";
+import { getCurrentUserEmail } from "@/utils/auth1";
+import { Ionicons } from "@expo/vector-icons";
+import Entypo from "@expo/vector-icons/Entypo";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 // content JSON에서 첫 번째 이미지 URL 추출
 const getFirstImageUrl = (content: string): string | null => {
   try {
-    const parsed = JSON.parse(content)
-    const imageNode = parsed.content?.find((node: any) => node.type === 'image')
-    return imageNode?.attrs?.src ?? null
+    const parsed = JSON.parse(content);
+    const imageNode = parsed.content?.find(
+      (node: any) => node.type === "image",
+    );
+    return imageNode?.attrs?.src ?? null;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
 // content JSON에서 텍스트만 추출
 const getTextContent = (content: string): string => {
   try {
-    const parsed = JSON.parse(content)
-    return parsed.content
-      ?.flatMap((node: any) =>
-        node.content?.map((c: any) => c.text ?? '') ?? []
-      )
-      .join(' ') ?? ''
+    const parsed = JSON.parse(content);
+    return (
+      parsed.content
+        ?.flatMap(
+          (node: any) => node.content?.map((c: any) => c.text ?? "") ?? [],
+        )
+        .join(" ") ?? ""
+    );
   } catch {
-    return content
+    return content;
   }
-}
+};
 
 // 날짜 포맷
 const formatDate = (dateStr: string): string => {
-  const d = new Date(dateStr)
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
-}
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+};
 
 interface Props {
-  post: PostResponse
+  post: PostResponse;
 }
 
 const PostFeedCard = ({ post }: Props) => {
-  const router = useRouter()
-  const imageUrl = getFirstImageUrl(post.content)
-  const textContent = getTextContent(post.content)
+  const router = useRouter();
+  const imageUrl = getFirstImageUrl(post.content);
+  const textContent = getTextContent(post.content);
 
-  const [liked, setLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(0)
-  const [expanded, setExpanded] = useState(false)
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
   // 자신이 쓴 게시물말 수정 삭제 권한
-  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const loadLikeStatus = async () => {
       try {
         // 이메일 가져오기
-        const email = await getCurrentUserEmail()
-        setCurrentEmail(email)
+        const email = await getCurrentUserEmail();
+        setCurrentEmail(email);
         // 실제 좋아요 상태 API 조회
-        const likeData = await postApi.getLikeStatus(post.id, email ?? '')
-        setLiked(likeData.liked)
-        setLikeCount(likeData.likeCount)
+        const likeData = await postApi.getLikeStatus(post.id, email ?? "");
+        setLiked(likeData.liked);
+        setLikeCount(likeData.likeCount);
       } catch {
         // 실패해도 0 유지
       }
-    }
-    loadLikeStatus()
-  }, [post.id])
-
-
+    };
+    loadLikeStatus();
+  }, [post.id]);
 
   // 좋아요 토글
   const handleLike = async () => {
     try {
-      await postApi.toggleLike(post.id, currentEmail ?? '')
-      const newLiked = !liked
-      setLiked(newLiked)
-      setLikeCount((prev) => prev + (newLiked ? 1 : -1))
+      await postApi.toggleLike(post.id, currentEmail ?? "");
+      const newLiked = !liked;
+      setLiked(newLiked);
+      setLikeCount((prev) => prev + (newLiked ? 1 : -1));
     } catch (e) {
-      console.error('좋아요 오류', e)
+      console.error("좋아요 오류", e);
     }
-  }
+  };
 
   // 이미지 클릭 상세 이동
   const handleImagePress = () => {
-    router.push(`/post/${post.id}` as any)
-  }
+    router.push(`/post/${post.id}` as any);
+  };
 
   return (
     <View style={styles.card}>
-
       {/* 이미지 + 프사/닉네임 겹치기 */}
       <Pressable onPress={handleImagePress}>
         <View style={styles.imageWrapper}>
@@ -108,7 +102,7 @@ const PostFeedCard = ({ post }: Props) => {
             <Image
               source={{ uri: imageUrl }}
               style={styles.image}
-              resizeMode='cover'
+              resizeMode="cover"
             />
           ) : (
             <View style={styles.noImage}>
@@ -117,32 +111,47 @@ const PostFeedCard = ({ post }: Props) => {
           )}
 
           {/* 프사 + 닉네임 - 이미지 좌상단 겹침 */}
-          <View style={styles.profileRow}>
+          <Pressable
+            style={styles.profileRow}
+            onPress={() => {
+              if (currentEmail === post.memEmail) return;
+              dmApi
+                .getOrCreateRoom({
+                  senderEmail: currentEmail!,
+                  receiverEmail: post.memEmail,
+                })
+                .then((room) => {
+                  router.push(`/dm/${room.id}` as any);
+                });
+            }}
+          >
             <Image
               source={
                 post.memProfileImg
                   ? { uri: post.memProfileImg }
-                  : require('@/assets/images/default-profile.png')
+                  : require("@/assets/images/default-profile.png")
               }
               style={styles.profileImg}
             />
-            <Text style={styles.nickname}>{post.memNickname ?? '알 수 없음'}</Text>
-          </View>
+            <Text style={styles.nickname}>
+              {post.memNickname ?? "알 수 없음"}
+            </Text>
+          </Pressable>
         </View>
       </Pressable>
 
       {/* 제목 + 더보기 */}
       <View style={styles.titleRow}>
-        <Text style={styles.title} numberOfLines={1}>{post.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {post.title}
+        </Text>
         <Pressable onPress={() => setExpanded((prev) => !prev)}>
-          <Text style={styles.moreBtn}>{expanded ? '접기' : '더보기'}</Text>
+          <Text style={styles.moreBtn}>{expanded ? "접기" : "더보기"}</Text>
         </Pressable>
       </View>
 
       {/* 더보기 펼쳤을 때 본문 */}
-      {expanded && (
-        <Text style={styles.content}>{textContent}</Text>
-      )}
+      {expanded && <Text style={styles.content}>{textContent}</Text>}
 
       {/* 업로드 날짜 */}
       <Text style={styles.date}>{formatDate(post.createdAt)}</Text>
@@ -150,106 +159,101 @@ const PostFeedCard = ({ post }: Props) => {
       {/* 좋아요 + 댓글수 */}
       <View style={styles.footerRow}>
         <Pressable style={styles.footerItem} onPress={handleLike}>
-          
-          <Entypo 
-            name={liked ? 'heart' : 'heart-outlined'} 
-            size={24} 
-            color={liked ? '#e74c3c' : '#888'} 
+          <Entypo
+            name={liked ? "heart" : "heart-outlined"}
+            size={24}
+            color={liked ? "#e74c3c" : "#888"}
           />
           <Text style={styles.footerCount}>{likeCount}</Text>
         </Pressable>
 
-        <Pressable
-          style={styles.footerItem}
-          onPress={handleImagePress}
-        >
-          <Ionicons name='chatbubble-outline' size={20} color='#888' />
+        <Pressable style={styles.footerItem} onPress={handleImagePress}>
+          <Ionicons name="chatbubble-outline" size={20} color="#888" />
           <Text style={styles.footerCount}>{post.commentCount ?? 0}</Text>
         </Pressable>
       </View>
-
     </View>
-  )
-}
+  );
+};
 
-export default PostFeedCard
+export default PostFeedCard;
 
 const styles = StyleSheet.create({
   card: {
     marginBottom: 40,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
   imageWrapper: {
-    position: 'relative',
+    position: "relative",
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 220,
   },
   noImage: {
-    width: '100%',
+    width: "100%",
     height: 220,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f0f0f0",
+    alignItems: "center",
+    justifyContent: "center",
   },
   noImageText: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 13,
   },
   profileRow: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     left: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   profileImg: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#eee',
+    backgroundColor: "#eee",
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.6)',
+    borderColor: "rgba(255,255,255,0.6)",
   },
   nickname: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#fff',
-    textShadowColor: 'rgba(0,0,0,0.6)',
+    fontWeight: "600",
+    color: "#fff",
+    textShadowColor: "rgba(0,0,0,0.6)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 12,
     paddingTop: 10,
   },
   title: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#222',
+    fontWeight: "700",
+    color: "#222",
     marginRight: 8,
   },
   moreBtn: {
     fontSize: 12,
-    color: '#4CAF50',
-    fontWeight: '600',
+    color: "#4CAF50",
+    fontWeight: "600",
   },
   content: {
     paddingHorizontal: 12,
     paddingTop: 6,
     fontSize: 13,
-    color: '#555',
+    color: "#555",
     lineHeight: 20,
   },
   date: {
@@ -257,23 +261,23 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 4,
     fontSize: 11,
-    color: '#aaa',
+    color: "#aaa",
   },
   footerRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: "#f0f0f0",
   },
   footerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   footerCount: {
     fontSize: 13,
-    color: '#888',
+    color: "#888",
   },
-})
+});
