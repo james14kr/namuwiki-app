@@ -38,6 +38,8 @@ export interface SensorActuatorData {
   soilMax: number;
   luxMin: number;
   luxMax: number;
+  humidityMin: number;
+  humidityMax: number;
 }
 
 export type FeedCategory = "농업인" | "소비자";
@@ -65,4 +67,25 @@ export interface SensorHistory{
   humidity: number;
   soilMoistureValue : number;
   ldrValue: number;
+}
+
+//임계값 수정 요청 타입
+export interface ThresholdUpdateData{
+  crops: string
+  tempMin: number
+  tempMax: number
+  humidityMin: number
+  humidityMax: number
+  soilMin: number
+  soilMax: number
+  luxMin: number
+  luxMax: number
+}
+
+//수동 제어 요청 타입
+export interface DeviceControlData{
+  deviceId: string
+  fanOverride: number | null
+  ledOverride: number | null
+  pumpOverride: number | null
 }

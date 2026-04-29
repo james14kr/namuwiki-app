@@ -20,4 +20,7 @@ export interface DeviceItem{
   createdAt : string;
   cropName : string | null;
   farmName : string | null;
+  fanOverride : number | null;
+  ledOverride: number | null;
+  pumpOverride: number | null;
 }

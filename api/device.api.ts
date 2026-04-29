@@ -1,4 +1,5 @@
 import type { DeviceRegisterData } from "@/types/deviceType";
+import { DeviceControlData } from "@/types/namuType";
 import { api } from "@/utils"
 
 //관리자: 기기 ID 생성
@@ -29,4 +30,10 @@ export const getMyDevices = async (farmerEmail : string) => {
 export const unlinkDevice = async(cropId : number) => {
   const response = await api.patch(`/device/unlink`, null, {params: {cropId}})
   return response.data;
+}
+
+//수동 제어 override 업데이트
+export const patchDeviceControl = async (data: DeviceControlData) => {
+  const response = await api.patch('/device/control', data)
+  return response.data
 }

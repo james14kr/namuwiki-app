@@ -1,4 +1,4 @@
-import type { SensorActuatorData, SensorHistory } from "@/types/namuType";
+import type { SensorActuatorData, SensorHistory, ThresholdUpdateData } from "@/types/namuType";
 import { api } from "@/utils";
 
 
@@ -11,4 +11,10 @@ export const getSensorDataByCropId = async (cropId : number): Promise<SensorActu
 export const getSensorHistory = async (cropId: number, limit = 20, startDate?: string): Promise<SensorHistory[]> => {
   const response = await api.get(`/sensorActuator/history/crop`, {params: {cropId, limit, ...(startDate && {startDate})}});
   return response.data;
+}
+
+//임계값 수정
+export const patchThreshold = async(data: ThresholdUpdateData) => {
+  const response = await api.patch('/sensorActuator/threshold', data)
+  return response.data
 }

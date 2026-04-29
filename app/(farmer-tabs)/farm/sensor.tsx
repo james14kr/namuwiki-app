@@ -1,7 +1,7 @@
 import { useGetSensorData } from '@/queries/sensor/useGetSensorData'
 import { useGetSensorHistory } from '@/queries/sensor/useGetSensorHistory'
 import { SensorHistory } from '@/types/namuType'
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
@@ -10,7 +10,7 @@ const Sensor = () => {
   const { cropId } = useLocalSearchParams()
   const numericCropId = Number(cropId)
 
-  const { data: sensorData, isLoading } = useGetSensorData(numericCropId)
+  const { data: sensorData, isLoading, isError, error } = useGetSensorData(numericCropId)
 
   const [activeTab, setActiveTab] = useState<'temp' | 'humidity' | 'soil' | 'lux'>('temp')
   const [chartPeriod, setChartPeriod] = useState<'day'| 'week' | 'month'>('day')
@@ -53,7 +53,7 @@ const Sensor = () => {
     return {value: valueMap[activeTab]}
   }) ?? []
 
-  if (isLoading) return <Text>로딩 중...</Text>
+  if (isLoading && !sensorData) return <Text>로딩 중...</Text>
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 70}}>
@@ -116,8 +116,25 @@ const Sensor = () => {
               <Text style={styles.actuatorStatus}>{sensorData.pumpStatus === 1 ? 'ON' : 'OFF'}</Text>
             </View>
           </View>
+          <View style={styles.actuatorRow}>
+            <Pressable
+              style={({pressed}) => [styles.controlBtn, pressed && styles.pressed]}
+              onPress={() => router.push({
+                pathname: '/(farmer-tabs)/farm/control',
+                params: {
+                  cropId: String(cropId),
+                  deviceId: sensorData?.deviceId,
+                  crops: sensorData?.crops
+                }
+              })}
+            >
+              <Text style={styles.controlBtnText}>⚙️ 기기 제어</Text>
+            </Pressable>
+          </View>
         </>
       )}
+
+  
 
       <View style={styles.historyHeader}><Text style={styles.sectionTitle}>📊 측정 차트</Text></View>
 
@@ -227,7 +244,7 @@ const Sensor = () => {
             </Pressable>
           )}
         </>
-       
+
       )}
 
     </ScrollView>
@@ -427,4 +444,19 @@ const styles = StyleSheet.create({
     color: '#6A9469',
     fontWeight: 'bold',
   },
+  controlBtn: {
+    flex: 1,
+    backgroundColor: '#2C4A2C',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginTop: 10
+  },
+  controlBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center'
+  },
+  pressed: { opacity: 0.7 },
 })
