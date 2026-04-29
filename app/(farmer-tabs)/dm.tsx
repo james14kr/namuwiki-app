@@ -1,8 +1,8 @@
 import { dmApi } from "@/api/dm.api";
 import { ChatRoomDTO } from "@/types/dmType";
 import { getUserEmail } from "@/utils";
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -60,6 +60,18 @@ const DmHome = () => {
       dmApi.getMyRooms(email).then((data) => setRooms(data));
     });
   }, []);
+
+    useFocusEffect(
+    useCallback(() => {
+      getUserEmail().then((email) => {
+        setCurrentUserEmail(email);
+        if (!email) return;
+        dmApi.getMyRooms(email).then((data) => {
+          setRooms(data);
+        });
+      });
+    }, []),
+  );
 
   const getOpponent = (room: ChatRoomDTO) => {
     if (room.senderEmail === currentUserEmail) {
