@@ -9,6 +9,7 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import FarmerBar from '@/components/farmer-bar'
 import { getFollowList } from '@/api/follow.api'
 import { getCurrentUserEmail } from '@/utils/auth1'
+import { json } from 'zod'
 import * as Location from 'expo-location'
 import { getWeather } from '@/api/weather.api'
 import { Ionicons } from '@expo/vector-icons'
@@ -20,6 +21,7 @@ interface FollowItem {
   farmerProfileImg: string | null
 }
 
+const PAGE_SIZE = 5
 const getWeatherImage = (main: string) => {
   switch(main) {
     case 'Clear':
@@ -111,6 +113,10 @@ const Home = () => {
   // 현재 선택된 농장 이메일 (null이면 전체 게시글 표시)
   const [selectedFarmer, setSelectedFarmer] = useState<string | null>(null)
 
+  // 현재 보여줄 게시글 수
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
+
+
   // ── 구독 농장 목록 로드 ──
   // 로그인한 유저의 이메일로 팔로우 목록 조회
   // 앱 최초 실행 시 한 번만 실행 (빈 의존성 배열)
@@ -120,6 +126,7 @@ const Home = () => {
         const email = await getCurrentUserEmail()
         if (!email) return
         const data = await getFollowList(email)
+        console.log(`팔로우 목록 : `, JSON.stringify(data))
         setFollowList(data)
       } catch (e) {
         console.error('팔로우 목록 오류', e)
@@ -143,9 +150,17 @@ const Home = () => {
 
   // ── 게시글 필터링 ──
   // selectedFarmer가 null이면 전체, 아니면 해당 농장주 게시글만
-  const filteredPosts = selectedFarmer
+  // 해당 수만큼 잘라서 보여주기 (무한스크롤)
+  const filteredPosts = (selectedFarmer
     ? posts.filter((p) => p.memEmail === selectedFarmer)
     : posts
+  ).slice(0, displayCount)  // 
+
+  // 해당 수만큼 피드 불러오기
+  const handleLoadMore = () => {
+    setDisplayCount((prev) => prev + PAGE_SIZE)
+  }
+
   useEffect(() => {
     
     const loadWeather = async () => {
@@ -177,11 +192,12 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
 
+      {/* 헤더 */}
       <View style={styles.header}>
         <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
         <View style={styles.headerIcons}>
           <Pressable>
-          <Ionicons name="search-outline" size={24} color="#2C4A2C" />
+            <Ionicons name="search-outline" size={24} color="#2C4A2C" />
           </Pressable>
           <Pressable>
             <Ionicons name="notifications-outline" size={24} color="#2C4A2C" />
@@ -189,20 +205,24 @@ const Home = () => {
         </View>
       </View>
 
+      {/* 구독 농장 바 - 스크롤해도 상단 고정 */}
+      <FarmerBar
+        followList={followList}
+        selectedFarmer={selectedFarmer}
+        onSelect={(email) => {
+          setSelectedFarmer(email)
+          setDisplayCount(PAGE_SIZE)  // 농장 바꾸면 5개로 초기화
+        }}
+      />
+
+      {/* 게시글 목록 + 날씨 배너 */}
       <FlatList
         data={filteredPosts}
-        ListHeaderComponent={
-          <>
-            <WeatherBanner weather={weather} />
-            <FarmerBar
-              followList={followList}
-              selectedFarmer={selectedFarmer}
-              onSelect={setSelectedFarmer}
-            />
-          </>
-        }
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={<WeatherBanner weather={weather} />}
         renderItem={({ item }) => <PostFeedCard post={item} />}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
       />
 
       {/* 게시글 등록 버튼 - 우하단 고정 */}

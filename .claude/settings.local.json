@@ -5,7 +5,11 @@
       "mcp__notionApi__API-post-search",
       "mcp__notionApi__API-post-page",
       "mcp__notionApi__API-patch-block-children",
-      "WebFetch(domain:www.notion.so)"
+      "WebFetch(domain:www.notion.so)",
+      "mcp__notionApi__API-get-block-children",
+      "mcp__notionApi__API-update-a-block",
+      "mcp__2601d8e8-7c17-439a-8ec3-d284ef1b8e61__notion-update-page",
+      "mcp__notionApi__API-delete-a-block"
     ]
   }
 }

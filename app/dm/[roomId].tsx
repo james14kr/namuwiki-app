@@ -1,11 +1,12 @@
 import { dmApi } from "@/api/dm.api";
 import Input from "@/components/ui/Input";
-import { ChatMessageDTO } from "@/types/dmType";
+import { ChatMessageDTO, ChatRoomDTO } from "@/types/dmType";
 import { getUserEmail } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "@stomp/stompjs";
+import { useFocusEffect } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -36,7 +37,9 @@ export default function DmRoom() {
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
   const messagesEndRef = useRef<ScrollView>(null);
   const [opponentNickname, setOpponentNickname] = useState<string>("");
-  const [opponentProfileImg, setOpponentProfileImg] = useState<string | null>(null);
+  const [opponentProfileImg, setOpponentProfileImg] = useState<string | null>(
+    null,
+  );
   const [inputValue, setInputValue] = useState<string>("");
   const stompClient = useRef<Client | null>(null);
 
@@ -51,7 +54,11 @@ export default function DmRoom() {
       if (!room) return;
       const isMe = room.senderEmail === currentUserEmail;
       setOpponentNickname(isMe ? room.receiverNickname : room.senderNickname);
-      setOpponentProfileImg(isMe ? (room.receiverProfileImg ?? null) : (room.senderProfileImg ?? null));
+      setOpponentProfileImg(
+        isMe
+          ? (room.receiverProfileImg ?? null)
+          : (room.senderProfileImg ?? null),
+      );
     });
   }, [roomId, currentUserEmail]);
 
@@ -98,20 +105,29 @@ export default function DmRoom() {
     });
     client.activate();
     stompClient.current = client;
-    return () => { client.deactivate(); };
+    return () => {
+      client.deactivate();
+    };
   }, [roomId, currentUserEmail]);
 
   return (
     <SafeAreaView style={styles.safe}>
       {/* 헤더 */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={8}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          hitSlop={8}
+        >
           <Ionicons name="chevron-back" size={24} color="#2C4A2C" />
         </Pressable>
 
         <View style={styles.headerCenter}>
           {opponentProfileImg ? (
-            <Image source={{ uri: opponentProfileImg }} style={styles.headerAvatar} />
+            <Image
+              source={{ uri: opponentProfileImg }}
+              style={styles.headerAvatar}
+            />
           ) : (
             <View style={styles.headerAvatarFallback}>
               <Text style={styles.headerAvatarInitial}>
@@ -142,10 +158,12 @@ export default function DmRoom() {
             const isMine = msg.senderEmail === currentUserEmail;
             const prevMsg = messages[index - 1];
             const showTime =
-              !prevMsg || formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
+              !prevMsg ||
+              formatTime(prevMsg.createdAt) !== formatTime(msg.createdAt);
             const showAvatar =
               !isMine &&
-              (index === 0 || messages[index - 1].senderEmail !== msg.senderEmail);
+              (index === 0 ||
+                messages[index - 1].senderEmail !== msg.senderEmail);
 
             return (
               <View
@@ -193,7 +211,9 @@ export default function DmRoom() {
                     <Text
                       style={[
                         styles.bubbleText,
-                        isMine ? styles.bubbleTextMine : styles.bubbleTextTheirs,
+                        isMine
+                          ? styles.bubbleTextMine
+                          : styles.bubbleTextTheirs,
                       ]}
                     >
                       {msg.content}
@@ -228,7 +248,10 @@ export default function DmRoom() {
           />
           <Pressable
             onPress={sendMessage}
-            style={({ pressed }) => [styles.sendBtn, pressed && styles.sendBtnPressed]}
+            style={({ pressed }) => [
+              styles.sendBtn,
+              pressed && styles.sendBtnPressed,
+            ]}
           >
             <Ionicons name="send" size={18} color="#FFFFFF" />
           </Pressable>
