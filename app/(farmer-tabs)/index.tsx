@@ -192,25 +192,12 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
 
-      {/* // 상단에 구독 농장 바 고정 */}
-      
-      <FarmerBar
-        followList={followList}           // 구독 농장 목록
-        selectedFarmer={selectedFarmer}   // 현재 선택된 농장
-        onSelect={(email)=>{
-          setSelectedFarmer(email)
-          setDisplayCount(PAGE_SIZE)  // 농장 바꾸면 5개로 초기화
-        }}
-
-      />
-      
-      <FlatList
-        data={filteredPosts}
+      {/* 헤더 */}
       <View style={styles.header}>
         <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
         <View style={styles.headerIcons}>
           <Pressable>
-          <Ionicons name="search-outline" size={24} color="#2C4A2C" />
+            <Ionicons name="search-outline" size={24} color="#2C4A2C" />
           </Pressable>
           <Pressable>
             <Ionicons name="notifications-outline" size={24} color="#2C4A2C" />
@@ -218,22 +205,22 @@ const Home = () => {
         </View>
       </View>
 
+      {/* 구독 농장 바 - 스크롤해도 상단 고정 */}
+      <FarmerBar
+        followList={followList}
+        selectedFarmer={selectedFarmer}
+        onSelect={(email) => {
+          setSelectedFarmer(email)
+          setDisplayCount(PAGE_SIZE)  // 농장 바꾸면 5개로 초기화
+        }}
+      />
+
+      {/* 게시글 목록 + 날씨 배너 */}
       <FlatList
         data={filteredPosts}
-        ListHeaderComponent={
-          <>
-            <WeatherBanner weather={weather} />
-            <FarmerBar
-              followList={followList}
-              selectedFarmer={selectedFarmer}
-              onSelect={setSelectedFarmer}
-            />
-          </>
-        }
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={<WeatherBanner weather={weather} />}
         renderItem={({ item }) => <PostFeedCard post={item} />}
-
-        // 스크롤 끝에 도달 시 호출
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
       />
