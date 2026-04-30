@@ -1,4 +1,4 @@
-import { Alert, FlatList, Pressable, StyleSheet, Text, View, ImageBackground, Image } from 'react-native'
+import { Alert, FlatList, Pressable, StyleSheet, Text, View, ImageBackground, Image, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useGetFarmDetail } from '@/queries/farm/useGetFarmDetail';
@@ -7,6 +7,7 @@ import { useDeleteFarm } from '@/queries/farm/useDeleteFarm';
 import { useDeleteCrop } from '@/queries/farm/useDeleteCrop';
 import { CropItem } from '@/types/cropType';
 import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const FarmDetail = () => {
 
@@ -38,121 +39,127 @@ const FarmDetail = () => {
     )
   }
 
-  if(farmLoading || cropLoading) return <Text>로딩 중...</Text>
+  if(farmLoading || cropLoading) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f6f0' }}>
+      <ActivityIndicator size="large" color="#6A9469" style={{ marginTop: 100 }} />
+    </SafeAreaView>
+  )
 
   return (
-    <FlatList
-      style={styles.container}
-      data={cropList}
-      numColumns={2}
-      columnWrapperStyle={styles.cropRow}
-      keyExtractor={(item) => item.cropId.toString()}
-
-      ListHeaderComponent={
-        <>
-          {/* 상단 헤더 */}
-          <View style={styles.topHeader}>
-            <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
-            <Pressable onPress={handleDeleteFarm}>
-              <Text style={styles.deleteBtnText}>🗑 농장 삭제</Text>
-            </Pressable>
-          </View>
-
-          {/* 농장 배너 */}
-          {farmDetail?.farmImg ? (
-            <ImageBackground
-              source={{ uri: farmDetail.farmImg }}
-              style={styles.banner}
-              resizeMode="cover"
-            >
-              <View style={styles.bannerOverlay}>
-                <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
-                <View style={styles.bannerAddrRow}>
-                  <Ionicons name="location-outline" size={13} color="#fff" />
-                  <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+    <SafeAreaView style={{flex:1 , backgroundColor: '#f4f6f0'}}>
+      <FlatList
+        style={styles.container}
+        data={cropList}
+        numColumns={2}
+        columnWrapperStyle={styles.cropRow}
+        keyExtractor={(item) => item.cropId.toString()}
+  
+        ListHeaderComponent={
+          <>
+            {/* 상단 헤더 */}
+            <View style={styles.topHeader}>
+              <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
+              <Pressable onPress={handleDeleteFarm}>
+                <Text style={styles.deleteBtnText}>🗑 농장 삭제</Text>
+              </Pressable>
+            </View>
+  
+            {/* 농장 배너 */}
+            {farmDetail?.farmImg ? (
+              <ImageBackground
+                source={{ uri: farmDetail.farmImg }}
+                style={styles.banner}
+                resizeMode="cover"
+              >
+                <View style={styles.bannerOverlay}>
+                  <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+                  <View style={styles.bannerAddrRow}>
+                    <Ionicons name="location-outline" size={13} color="#fff" />
+                    <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            ) : (
+              <View style={styles.banner}>
+                <View style={styles.bannerOverlay}>
+                  <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+                  <View style={styles.bannerAddrRow}>
+                    <Ionicons name="location-outline" size={13} color="#fff" />
+                    <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+                  </View>
                 </View>
               </View>
-            </ImageBackground>
-          ) : (
-            <View style={styles.banner}>
-              <View style={styles.bannerOverlay}>
-                <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
-                <View style={styles.bannerAddrRow}>
-                  <Ionicons name="location-outline" size={13} color="#fff" />
-                  <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
-                </View>
+            )}
+  
+            {/* 농장 소개 카드 */}
+            <View style={styles.introCard}>
+              <Text style={styles.introTitle}>농장 소개</Text>
+              <Text style={styles.introDesc}>{farmDetail?.farmDesc}</Text>
+            </View>
+  
+            {/* 농작물 목록 헤더 */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>🌱 농작물 목록</Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countText}>총 {cropList?.length}개 품목</Text>
               </View>
             </View>
-          )}
-
-          {/* 농장 소개 카드 */}
-          <View style={styles.introCard}>
-            <Text style={styles.introTitle}>농장 소개</Text>
-            <Text style={styles.introDesc}>{farmDetail?.farmDesc}</Text>
-          </View>
-
-          {/* 농작물 목록 헤더 */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>🌱 농작물 목록</Text>
-            <View style={styles.countBadge}>
-              <Text style={styles.countText}>총 {cropList?.length}개 품목</Text>
-            </View>
-          </View>
-        </>
-      }
-
-      renderItem={({item}: {item: CropItem}) => (
-        <Pressable
-          style={styles.cropCard}
-          onPress={() => router.push({
-            pathname: '/(farmer-tabs)/farm/sensor',
-            params: {cropId: item.cropId}
-          })}
-        >
-          {item.cropImg ? (
-            <Image source={{uri: item.cropImg}} style={styles.cropImgBox} />
-          ) : (
-            <View style={styles.cropImgBox}>
-              <Text style={{fontSize:28}}>🌿</Text>
-            </View>
-          )}
-          <Text style={styles.cropName}>{item.cropName}</Text>
-          <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
-          <Pressable onPress={() => {
-            Alert.alert(
-              '농작물 삭제',
-              '농작물을 삭제하려면 연결된 기기를 먼저 해제해야 합니다. 기기를 삭제하시겠습니까?',
-              [
-                {text: '취소', style: 'cancel'},
-                {
-                  text: '삭제',
-                  style: 'destructive',
-                  onPress: () => {
-                    deleteCrop(item.cropId, {
-                      onError: () => Alert.alert('삭제 실패', '연결된 기기가 있습니다. 먼저 기기를 해제해주세요')
-                    })
+          </>
+        }
+  
+        renderItem={({item}: {item: CropItem}) => (
+          <Pressable
+            style={styles.cropCard}
+            onPress={() => router.push({
+              pathname: '/(farmer-tabs)/farm/sensor',
+              params: {cropId: item.cropId}
+            })}
+          >
+            {item.cropImg ? (
+              <Image source={{uri: item.cropImg}} style={styles.cropImgBox} />
+            ) : (
+              <View style={styles.cropImgBox}>
+                <Text style={{fontSize:28}}>🌿</Text>
+              </View>
+            )}
+            <Text style={styles.cropName}>{item.cropName}</Text>
+            <Text style={styles.cropPrice}>{item.cropPrice.toLocaleString()}원</Text>
+            <Pressable onPress={() => {
+              Alert.alert(
+                '농작물 삭제',
+                '농작물을 삭제하려면 연결된 기기를 먼저 해제해야 합니다. 기기를 삭제하시겠습니까?',
+                [
+                  {text: '취소', style: 'cancel'},
+                  {
+                    text: '삭제',
+                    style: 'destructive',
+                    onPress: () => {
+                      deleteCrop(item.cropId, {
+                        onError: () => Alert.alert('삭제 실패', '연결된 기기가 있습니다. 먼저 기기를 해제해주세요')
+                      })
+                    }
                   }
-                }
-              ]
-            )
-          }}>
-            <Text style={styles.cropDeleteText}>삭제</Text>
+                ]
+              )
+            }}>
+              <Text style={styles.cropDeleteText}>삭제</Text>
+            </Pressable>
           </Pressable>
-        </Pressable>
-      )}
-
-      ListFooterComponent={
-        <Pressable
-          style={styles.registerBtn}
-          onPress={() => router.push({
-            pathname: '/(farmer-tabs)/farm/cropRegister',
-            params: {farmId: numericFarmId}
-          })}
-        >
-          <Text style={styles.registerBtnText}>농작물 등록</Text>
-        </Pressable>
-      }
-    />
+        )}
+  
+        ListFooterComponent={
+          <Pressable
+            style={styles.registerBtn}
+            onPress={() => router.push({
+              pathname: '/(farmer-tabs)/farm/cropRegister',
+              params: {farmId: numericFarmId}
+            })}
+          >
+            <Text style={styles.registerBtnText}>농작물 등록</Text>
+          </Pressable>
+        }
+      />
+    </SafeAreaView>
   )
 }
 
@@ -170,7 +177,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 60,
     paddingBottom: 12,
     backgroundColor: '#f4f6f0',
   },

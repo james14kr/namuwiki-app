@@ -22,28 +22,28 @@ const UserTabLayout = () => {
         name="index" 
         options={{ 
           title: '홈', 
-          tabBarIcon: ({ color }) =>  <Entypo name="home" size={24} color="black" />
+          tabBarIcon: ({ color }) =>  <Entypo name="home" size={24} color={color} />
         }} 
       />
       <Tabs.Screen 
         name="farm" 
         options={{ 
           title: '농장목록', 
-          tabBarIcon: ({ color }) =><AntDesign name="unordered-list" size={24} color="black" />,
+          tabBarIcon: ({ color }) =><AntDesign name="unordered-list" size={24} color={color} />,
         }} 
       />
       <Tabs.Screen 
         name="dm" 
         options={{ 
           title: '채팅', 
-          tabBarIcon: ({ color }) => <Entypo name="chat" size={24} color="black" />
+          tabBarIcon: ({ color }) => <Entypo name="chat" size={24} color={color} />
         }} 
       />
       <Tabs.Screen 
         name="profile" 
         options={{ 
           title: '프로필', 
-          tabBarIcon: ({ color }) => <Ionicons name="person-circle-outline" size={24} color="black" />,
+          tabBarIcon: ({ color }) => <Ionicons name="person-circle-outline" size={24} color={color} />,
         }} 
       />
     </Tabs>

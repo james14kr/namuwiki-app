@@ -10,6 +10,7 @@ import { CropItem } from '@/types/cropType'
 import Toast from 'react-native-toast-message'
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList'
 import { FarmItem } from '@/types/farmType'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const DeviceCard = ({item} : {item: DeviceItem}) => {
   const {mutate: unlinkDevice} = useUnlinkDevice(item.cropId ?? 0)
@@ -75,72 +76,74 @@ const Device = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>📡 기기 등록</Text>
-
-      {/* 기기 ID 입력 */}
-      <Text style={styles.label}>기기 ID</Text>
-      <TextInput
-        style={styles.input}
-        placeholder='기기 ID를 입력하세요'
-        value={device.deviceId}
-        onChangeText={(text) => setDevice({...device, deviceId: text})}
-        autoCapitalize='none'
-      />
-
-      {/* 농장 선택 */}
-      <Text style={styles.label}>농장 선택</Text>
-      <View style={styles.cropSelectRow}>
-        {farmList?.map((farm: FarmItem) => (
-          <Pressable
-            key={farm.farmId}
-            style={[styles.cropBtn, selectedFarmId === farm.farmId && styles.cropBtnSelected]}
-            onPress={() => {
-              setSelectedFarmId(farm.farmId)
-              setDevice(prev => ({...prev, cropId: 0}))
-            }}
-          >
-            <Text>{farm.farmName}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* 농작물 선택 */}
-      {selectedFarmId !== 0 && (
-        <>
-          <Text style={styles.label}>연결할 농작물 선택</Text>
-          <View style={styles.cropSelectRow}>
-          {cropList?.map((crop: CropItem) => (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f6f0' }}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>📡 기기 등록</Text>
+  
+        {/* 기기 ID 입력 */}
+        <Text style={styles.label}>기기 ID</Text>
+        <TextInput
+          style={styles.input}
+          placeholder='기기 ID를 입력하세요'
+          value={device.deviceId}
+          onChangeText={(text) => setDevice({...device, deviceId: text})}
+          autoCapitalize='none'
+        />
+  
+        {/* 농장 선택 */}
+        <Text style={styles.label}>농장 선택</Text>
+        <View style={styles.cropSelectRow}>
+          {farmList?.map((farm: FarmItem) => (
             <Pressable
-              key={crop.cropId}
-              style={[styles.cropBtn, device.cropId === crop.cropId && styles.cropBtnSelected]}
-              onPress={() => setDevice({...device, cropId: crop.cropId})}
+              key={farm.farmId}
+              style={[styles.cropBtn, selectedFarmId === farm.farmId && styles.cropBtnSelected]}
+              onPress={() => {
+                setSelectedFarmId(farm.farmId)
+                setDevice(prev => ({...prev, cropId: 0}))
+              }}
             >
-              <Text>
-                {crop.cropName}
-              </Text>
+              <Text style={[styles.cropBtnText, selectedFarmId === farm.farmId && styles.cropBtnTextSelected]}>{farm.farmName}</Text>
             </Pressable>
           ))}
-          </View>
-        </>
-      )}
-
-      <Pressable style={styles.submitBtn} onPress={handleSubmit}>
-       <Text style={styles.submitText}>등록하기</Text>
-      </Pressable>
-
-      {/* 내 기기 등록 */}
-      <Text style={styles.sectionTitle}>
-        📋{selectedFarmName ? `${selectedFarmName} 농장에 연결된 기기 목록` : '내 기기 목록'}
-      </Text>
-       <FlatList
-        data={filteredDeviceList}
-        keyExtractor={(item) => item.deviceId}
-        renderItem={({item} : {item: DeviceItem}) => <DeviceCard item={item}/>}
-        scrollEnabled={false}
-       />
-
-    </ScrollView>
+        </View>
+  
+        {/* 농작물 선택 */}
+        {selectedFarmId !== 0 && (
+          <>
+            <Text style={styles.label}>연결할 농작물 선택</Text>
+            <View style={styles.cropSelectRow}>
+            {cropList?.map((crop: CropItem) => (
+              <Pressable
+                key={crop.cropId}
+                style={[styles.cropBtn, device.cropId === crop.cropId && styles.cropBtnSelected]}
+                onPress={() => setDevice({...device, cropId: crop.cropId})}
+              >
+                <Text style={[styles.cropBtnText, device.cropId === crop.cropId && styles.cropBtnTextSelected]}>
+                  {crop.cropName}
+                </Text>
+              </Pressable>
+            ))}
+            </View>
+          </>
+        )}
+  
+        <Pressable style={styles.submitBtn} onPress={handleSubmit}>
+         <Text style={styles.submitText}>등록하기</Text>
+        </Pressable>
+  
+        {/* 내 기기 등록 */}
+        <Text style={styles.sectionTitle}>
+          📋{selectedFarmName ? `${selectedFarmName} 농장에 연결된 기기 목록` : '내 기기 목록'}
+        </Text>
+         <FlatList
+          data={filteredDeviceList}
+          keyExtractor={(item) => item.deviceId}
+          renderItem={({item} : {item: DeviceItem}) => <DeviceCard item={item}/>}
+          scrollEnabled={false}
+         />
+  
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -151,7 +154,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f6f0',
     padding: 20,
-    paddingTop: 60,
   },
 
   // 타이틀

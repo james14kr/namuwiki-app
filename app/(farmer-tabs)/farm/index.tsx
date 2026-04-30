@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View, Image } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { getUserEmail, getUserNickName } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
@@ -8,6 +8,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { useFocusEffect } from 'expo-router'
 import { useCallback } from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Farm = () => {
 
@@ -33,7 +34,11 @@ const Farm = () => {
   const {data, isLoading, refetch} = useGetMyFarmList(farmerEmail ?? "");
 
   //4. 로딩 처리
-  if(isLoading) return <Text>로딩 중...</Text>
+  if(isLoading) return(
+    <SafeAreaView style={styles.container}>
+      <ActivityIndicator size="large" color="#6A9469" style={{marginTop: 100}}/>
+    </SafeAreaView>
+  )
 
   //5. 빈 데이터 처리
   if(!data || data.length === 0) return (
@@ -50,7 +55,7 @@ const Farm = () => {
   )
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
 
       <Text style={styles.header}>
         {nickName}님의 농장 목록입니다
@@ -102,7 +107,7 @@ const Farm = () => {
       </Pressable>
 
       
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -112,12 +117,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f6f0',  // 연한 녹색 배경
-    marginTop: 60
   },
   header: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2d4a1e',
+    color: '#2C4A2C',
     padding: 16,
     paddingBottom: 8
   },
@@ -201,10 +205,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   emptyContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  backgroundColor: '#f4f6f0',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f4f6f0',
+    position: 'relative'
   },
   emptyText: {
     fontSize: 16,

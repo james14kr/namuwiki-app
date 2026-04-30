@@ -53,14 +53,6 @@ const DmHome = () => {
     return () => loop.stop();
   }, [waveAnim]);
 
-  useEffect(() => {
-    getUserEmail().then((email) => {
-      setCurrentUserEmail(email);
-      if (!email) return;
-      dmApi.getMyRooms(email).then((data) => setRooms(data));
-    });
-  }, []);
-
     useFocusEffect(
     useCallback(() => {
       getUserEmail().then((email) => {

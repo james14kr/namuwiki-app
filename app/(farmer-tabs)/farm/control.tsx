@@ -7,6 +7,7 @@ import { usePatchDeviceControl } from '@/queries/device/usePatchDeviceControl'
 import { getUserEmail } from '@/utils'
 import { useGetMyDevices } from '@/queries/device/useGetMyDevices'
 import { DeviceItem } from '@/types/deviceType'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const ControlScreen = () => {
   const { cropId, deviceId, crops } = useLocalSearchParams<{
@@ -120,96 +121,98 @@ const ControlScreen = () => {
   )
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📐 임계값 설정</Text>
-
-        <View style={styles.inputRow}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>온도 최소 (°C)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.tempMin}
-              onChangeText={v => setThreshold(prev => ({ ...prev, tempMin: v }))} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f6f0' }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+  
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📐 임계값 설정</Text>
+  
+          <View style={styles.inputRow}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>온도 최소 (°C)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.tempMin}
+                onChangeText={v => setThreshold(prev => ({ ...prev, tempMin: v }))} />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>온도 최대 (°C)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.tempMax}
+                onChangeText={v => setThreshold(prev => ({ ...prev, tempMax: v }))} />
+            </View>
           </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>온도 최대 (°C)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.tempMax}
-              onChangeText={v => setThreshold(prev => ({ ...prev, tempMax: v }))} />
+  
+          <View style={styles.inputRow}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>습도 최소 (%)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.humidityMin}
+                onChangeText={v => setThreshold(prev => ({ ...prev, humidityMin: v }))} />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>습도 최대 (%)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.humidityMax}
+                onChangeText={v => setThreshold(prev => ({ ...prev, humidityMax: v }))} />
+            </View>
           </View>
+  
+          <View style={styles.inputRow}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>토양수분 최소 (%)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.soilMin}
+                onChangeText={v => setThreshold(prev => ({ ...prev, soilMin: v }))} />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>토양수분 최대 (%)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.soilMax}
+                onChangeText={v => setThreshold(prev => ({ ...prev, soilMax: v }))} />
+            </View>
+          </View>
+  
+          <View style={styles.inputRow}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>조도 최소 (lux)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.luxMin}
+                onChangeText={v => setThreshold(prev => ({ ...prev, luxMin: v }))} />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>조도 최대 (lux)</Text>
+              <TextInput style={styles.input} keyboardType="numeric"
+                value={threshold.luxMax}
+                onChangeText={v => setThreshold(prev => ({ ...prev, luxMax: v }))} />
+            </View>
+          </View>
+  
+          <Pressable style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
+            onPress={handleSaveThreshold} disabled={isThresholdPending}>
+            <Text style={styles.saveBtnText}>
+              {isThresholdPending ? '저장 중...' : '임계값 저장'}
+            </Text>
+          </Pressable>
         </View>
-
-        <View style={styles.inputRow}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>습도 최소 (%)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.humidityMin}
-              onChangeText={v => setThreshold(prev => ({ ...prev, humidityMin: v }))} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>습도 최대 (%)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.humidityMax}
-              onChangeText={v => setThreshold(prev => ({ ...prev, humidityMax: v }))} />
-          </View>
+  
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🎛 수동 제어</Text>
+          <Text style={styles.sectionDesc}>자동: 센서값 기반 자동 제어 / ON·OFF: 강제 제어</Text>
+  
+          <OverrideToggle label="🌀 팬" value={fanOverride} onChange={setFanOverride} />
+          <OverrideToggle label="💡 LED" value={ledOverride} onChange={setLedOverride} />
+          <OverrideToggle label="💧 펌프" value={pumpOverride} onChange={setPumpOverride} />
+  
+          <Pressable style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
+            onPress={handleSaveControl} disabled={isControlPending}>
+            <Text style={styles.saveBtnText}>
+              {isControlPending ? '전송 중...' : '제어 명령 전송'}
+            </Text>
+          </Pressable>
         </View>
-
-        <View style={styles.inputRow}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>토양수분 최소 (%)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.soilMin}
-              onChangeText={v => setThreshold(prev => ({ ...prev, soilMin: v }))} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>토양수분 최대 (%)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.soilMax}
-              onChangeText={v => setThreshold(prev => ({ ...prev, soilMax: v }))} />
-          </View>
-        </View>
-
-        <View style={styles.inputRow}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>조도 최소 (lux)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.luxMin}
-              onChangeText={v => setThreshold(prev => ({ ...prev, luxMin: v }))} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>조도 최대 (lux)</Text>
-            <TextInput style={styles.input} keyboardType="numeric"
-              value={threshold.luxMax}
-              onChangeText={v => setThreshold(prev => ({ ...prev, luxMax: v }))} />
-          </View>
-        </View>
-
-        <Pressable style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
-          onPress={handleSaveThreshold} disabled={isThresholdPending}>
-          <Text style={styles.saveBtnText}>
-            {isThresholdPending ? '저장 중...' : '임계값 저장'}
-          </Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🎛 수동 제어</Text>
-        <Text style={styles.sectionDesc}>자동: 센서값 기반 자동 제어 / ON·OFF: 강제 제어</Text>
-
-        <OverrideToggle label="🌀 팬" value={fanOverride} onChange={setFanOverride} />
-        <OverrideToggle label="💡 LED" value={ledOverride} onChange={setLedOverride} />
-        <OverrideToggle label="💧 펌프" value={pumpOverride} onChange={setPumpOverride} />
-
-        <Pressable style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
-          onPress={handleSaveControl} disabled={isControlPending}>
-          <Text style={styles.saveBtnText}>
-            {isControlPending ? '전송 중...' : '제어 명령 전송'}
-          </Text>
-        </Pressable>
-      </View>
-
-    </ScrollView>
+  
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 

@@ -245,7 +245,7 @@ export default function Profile() {
                     <Text style={styles.activityDate}>{formatDate(post.createdAt)}</Text>
                     <View style={styles.activityMeta}>
                       <Ionicons name="heart-outline" size={12} color="#aaa" />
-                      <Text style={styles.activityMetaText}>{post.commentCount ?? 0}</Text>
+                      <Text style={styles.activityMetaText}>{post.likeCount ?? 0}</Text>
                       <Ionicons name="chatbubble-outline" size={12} color="#aaa" style={{ marginLeft: 8 }} />
                       <Text style={styles.activityMetaText}>{post.commentCount ?? 0}</Text>
                     </View>

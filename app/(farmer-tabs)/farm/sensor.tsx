@@ -3,8 +3,9 @@ import { useGetSensorHistory } from '@/queries/sensor/useGetSensorHistory'
 import { SensorHistory } from '@/types/namuType'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Sensor = () => {
   const { cropId } = useLocalSearchParams()
@@ -53,201 +54,208 @@ const Sensor = () => {
     return {value: valueMap[activeTab]}
   }) ?? []
 
-  if (isLoading && !sensorData) return <Text>로딩 중...</Text>
+  if(isLoading && !sensorData) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f6f0' }}>
+      <ActivityIndicator size="large" color="#6A9469" style={{ marginTop: 100 }} />
+    </SafeAreaView>
+  )
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 70}}>
-      <Text style={styles.title}>📡 센서 데이터</Text>
-
-      {/* 연결된 기기 없음 처리 */}
-      {!sensorData ? (
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>연결된 기기가 없습니다</Text>
-        </View>
-      ) : (
-        <>
-          {/* 기기 정보 */}
-          <Text style={styles.deviceInfo}>연결된 농작물: {sensorData.crops}</Text>
-          <Text style={styles.deviceInfo}>기기 ID: {sensorData.deviceId}</Text>
-          <Text style={styles.deviceInfo}>마지막 업데이트: {sensorData.createDate}</Text>
-
-          {/* 센서 값 */}
-          <Text style={styles.sectionTitle}>📡 센서 값</Text>
-          <View style={styles.sensorGrid}>
-
-            <View style={styles.sensorCard}>
-              <Text style={styles.sensorLabel}>🌡️온도</Text>
-              <Text style={styles.sensorValue}>{sensorData.tempC}°C</Text>
-              <Text style={styles.sensorRange}>{sensorData.tempMin}~{sensorData.tempMax}°C</Text>
-            </View>
-
-            <View style={styles.sensorCard}>
-              <Text style={styles.sensorLabel}>💧습도</Text>
-              <Text style={styles.sensorValue}>{sensorData.humidity}%</Text>
-            </View>
-
-            <View style={styles.sensorCard}>
-              <Text style={styles.sensorLabel}>🌱토양 수분</Text>
-              <Text style={styles.sensorValue}>{sensorData.soilMoistureValue}</Text>
-              <Text style={styles.sensorRange}>{sensorData.soilMin}~{sensorData.soilMax}</Text>
-            </View>
-
-            <View style={styles.sensorCard}>
-              <Text style={styles.sensorLabel}>☀️조도</Text>
-              <Text style={styles.sensorValue}>{sensorData.ldrValue}</Text>
-              <Text style={styles.sensorRange}>{sensorData.luxMin}~{sensorData.luxMax}</Text>
-            </View>
-
-          </View>
-
-          {/* 액추에이터 상태 */}
-          <Text style={styles.sectionTitle}>⚙️ 액추에이터</Text>
-          <View style={styles.actuatorRow}>
-            <View style={[styles.actuatorCard, sensorData.fanStatus === 1 && styles.actuatorOn]}>
-              <Text style={styles.actuatorLabel}>팬</Text>
-              <Text style={styles.actuatorStatus}>{sensorData.fanStatus === 1 ? 'ON' : 'OFF'}</Text>
-            </View>
-            <View style={[styles.actuatorCard, sensorData.ledStatus === 1 && styles.actuatorOn]}>
-              <Text style={styles.actuatorLabel}>LED</Text>
-              <Text style={styles.actuatorStatus}>{sensorData.ledStatus === 1 ? 'ON' : 'OFF'}</Text>
-            </View>
-            <View style={[styles.actuatorCard, sensorData.pumpStatus === 1 && styles.actuatorOn]}>
-              <Text style={styles.actuatorLabel}>펌프</Text>
-              <Text style={styles.actuatorStatus}>{sensorData.pumpStatus === 1 ? 'ON' : 'OFF'}</Text>
-            </View>
-          </View>
-          <View style={styles.actuatorRow}>
-            <Pressable
-              style={({pressed}) => [styles.controlBtn, pressed && styles.pressed]}
-              onPress={() => router.push({
-                pathname: '/(farmer-tabs)/farm/control',
-                params: {
-                  cropId: String(cropId),
-                  deviceId: sensorData?.deviceId,
-                  crops: sensorData?.crops
-                }
-              })}
-            >
-              <Text style={styles.controlBtnText}>⚙️ 기기 제어</Text>
-            </Pressable>
-          </View>
-        </>
-      )}
-
+    <SafeAreaView style={{flex:1, backgroundColor: '#f4f6f0'}}>
+      <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 70}}>
+        <Text style={styles.title}>📡 센서 데이터</Text>
   
-
-      <View style={styles.historyHeader}><Text style={styles.sectionTitle}>📊 측정 차트</Text></View>
-
-      {/* 기간 탭 버튼 */}
-      <View style={styles.periodRow}>
-        {(['day', 'week', 'month'] as const).map(p => {
-          const labelMap = {day: '하루', week: '일주일', month: '한달'}
-          return(
-            <Pressable
-              key={p}
-              style={[styles.periodBtn, chartPeriod === p && styles.periodBtnActive]}
-              onPress={() => setChartPeriod(p)}
-            >
-              <Text style={[styles.periodBtnText, chartPeriod === p && styles.periodBtnTextActive]}>
-                {labelMap[p]}
-              </Text>
-            </Pressable>
-          )
-        })}
-
-      </View>
-
-      {/* 탭 버튼 */}
-      <View style={styles.tabRow}>
-        {(['temp', 'humidity', 'soil', 'lux']as const).map(tab => {
-          const labelMap = { temp: '🌡️온도', humidity: '💧습도', soil: '🌱토양', lux: '☀️조도' }
-          return(
-            <Pressable
-              key={tab}
-              style={[styles.tabBtn, activeTab === tab && styles.tabBtnActive]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text style={[styles.tabBtnText, activeTab === tab && styles.tabBtnTextActive]}>
-                {labelMap[tab]}
-              </Text>
-            </Pressable>
-          )
-        })}
-      </View>
-
-      {/* 차트 */}
-      {chartData.length > 0 ? (
-        <LineChart
-          data={chartData}
-          height={200}
-          color1='#6a9469'
-          thickness={2}
-          hideDataPoints={false}
-          dataPointsColor='#2c4a2c'
-          backgroundColor="#fff"
-          curved
-          yAxisTextStyle={{color: '#888', fontSize: 11}}
-          noOfSections={4}
-          initialSpacing={10}
-        />
-      ) : (
-        <Text style={styles.emptyText}>히스토리 데이터가 없습니다.</Text>
-      )}
-  
-      {/* 히스토리 */}
-      <Pressable style={styles.historyHeader} onPress={() => setIsHistoryOpen(prev => !prev)}>
-        <Text style={styles.sectionTitle}>📋 측정 히스토리</Text>
-        <Text style={styles.toggleIcon}>{isHistoryOpen ? '▲' : '▼'}</Text>
-      </Pressable>
-
-      {isHistoryOpen && (
-        <>
-          <View style={styles.periodRow}>
-            {(['day', 'week', 'month'] as const).map(p => {
-              const labelMap = {day: '하루', week: '일주일', month: '한달'}
-              return(
-                <Pressable
-                  key={p}
-                  style={[styles.periodBtn, historyPeriod === p && styles.periodBtnActive]}
-                  onPress={() => setHistoryPeriod(p)}
-                >
-                  <Text style={[styles.periodBtnText, historyPeriod === p && styles.periodBtnTextActive]}>
-                    {labelMap[p]}
-                  </Text>
-                </Pressable>
-              )
-            })}
-
+        {/* 연결된 기기 없음 처리 */}
+        {!sensorData ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>연결된 기기가 없습니다</Text>
           </View>
-          <FlatList
-            data={historyList}
-            keyExtractor={(item, index) => index.toString()}
-            scrollEnabled={false}
-            renderItem={({ item }: { item: SensorHistory }) => (
-              <View style={styles.historyCard}>
-                <Text style={styles.historyDate}>{item.createDate}</Text>
-                <View style={styles.historyRow}>
-                  <Text style={styles.historyItem}>🌡️ {item.tempC}°C</Text>
-                  <Text style={styles.historyItem}>💧 {item.humidity}%</Text>
-                  <Text style={styles.historyItem}>🌱 {item.soilMoistureValue}</Text>
-                  <Text style={styles.historyItem}>☀️ {item.ldrValue}</Text>
-                </View>
+        ) : (
+          <>
+            {/* 기기 정보 */}
+            <Text style={styles.deviceInfo}>연결된 농작물: {sensorData.crops}</Text>
+            <Text style={styles.deviceInfo}>기기 ID: {sensorData.deviceId}</Text>
+            <Text style={styles.deviceInfo}>마지막 업데이트: {sensorData.createDate}</Text>
+  
+            {/* 센서 값 */}
+            <Text style={styles.sectionTitle}>📡 센서 값</Text>
+            <View style={styles.sensorGrid}>
+  
+              <View style={styles.sensorCard}>
+                <Text style={styles.sensorLabel}>🌡️온도</Text>
+                <Text style={styles.sensorValue}>{sensorData.tempC}°C</Text>
+                <Text style={styles.sensorRange}>{sensorData.tempMin}~{sensorData.tempMax}°C</Text>
               </View>
-            )}
+  
+              <View style={styles.sensorCard}>
+                <Text style={styles.sensorLabel}>💧습도</Text>
+                <Text style={styles.sensorValue}>{sensorData.humidity}%</Text>
+                <Text style={styles.sensorRange}>{sensorData.humidityMin}~{sensorData.humidityMax}%</Text>
+              </View>
+  
+              <View style={styles.sensorCard}>
+                <Text style={styles.sensorLabel}>🌱토양 수분</Text>
+                <Text style={styles.sensorValue}>{sensorData.soilMoistureValue}</Text>
+                <Text style={styles.sensorRange}>{sensorData.soilMin}~{sensorData.soilMax}%</Text>
+              </View>
+  
+              <View style={styles.sensorCard}>
+                <Text style={styles.sensorLabel}>☀️조도</Text>
+                <Text style={styles.sensorValue}>{sensorData.ldrValue}</Text>
+                <Text style={styles.sensorRange}>{sensorData.luxMin}~{sensorData.luxMax} LUX</Text>
+              </View>
+  
+            </View>
+  
+            {/* 액추에이터 상태 */}
+            <Text style={styles.sectionTitle}>⚙️ 액추에이터</Text>
+            <View style={styles.actuatorRow}>
+              <View style={[styles.actuatorCard, sensorData.fanStatus === 1 && styles.actuatorOn]}>
+                <Text style={[styles.actuatorLabel, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>팬</Text>
+                <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.fanStatus === 1 ? 'ON' : 'OFF'}</Text>
+              </View>
+              <View style={[styles.actuatorCard, sensorData.ledStatus === 1 && styles.actuatorOn]}>
+                <Text style={[styles.actuatorLabel, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>LED</Text>
+                <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.ledStatus === 1 ? 'ON' : 'OFF'}</Text>
+              </View>
+              <View style={[styles.actuatorCard, sensorData.pumpStatus === 1 && styles.actuatorOn]}>
+                <Text style={[styles.actuatorLabel, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>펌프</Text>
+                <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.pumpStatus === 1 ? 'ON' : 'OFF'}</Text>
+              </View>
+            </View>
+            <View style={styles.actuatorRow}>
+              <Pressable
+                style={({pressed}) => [styles.controlBtn, pressed && styles.pressed]}
+                onPress={() => router.push({
+                  pathname: '/(farmer-tabs)/farm/control',
+                  params: {
+                    cropId: String(cropId),
+                    deviceId: sensorData?.deviceId,
+                    crops: sensorData?.crops
+                  }
+                })}
+              >
+                <Text style={styles.controlBtnText}>⚙️ 기기 제어</Text>
+              </Pressable>
+            </View>
+          </>
+        )}
+  
+    
+  
+        <View style={styles.historyHeader}><Text style={styles.sectionTitle}>📊 측정 차트</Text></View>
+  
+        {/* 기간 탭 버튼 */}
+        <View style={styles.periodRow}>
+          {(['day', 'week', 'month'] as const).map(p => {
+            const labelMap = {day: '하루', week: '일주일', month: '한달'}
+            return(
+              <Pressable
+                key={p}
+                style={[styles.periodBtn, chartPeriod === p && styles.periodBtnActive]}
+                onPress={() => setChartPeriod(p)}
+              >
+                <Text style={[styles.periodBtnText, chartPeriod === p && styles.periodBtnTextActive]}>
+                  {labelMap[p]}
+                </Text>
+              </Pressable>
+            )
+          })}
+  
+        </View>
+  
+        {/* 탭 버튼 */}
+        <View style={styles.tabRow}>
+          {(['temp', 'humidity', 'soil', 'lux']as const).map(tab => {
+            const labelMap = { temp: '🌡️온도', humidity: '💧습도', soil: '🌱토양', lux: '☀️조도' }
+            return(
+              <Pressable
+                key={tab}
+                style={[styles.tabBtn, activeTab === tab && styles.tabBtnActive]}
+                onPress={() => setActiveTab(tab)}
+              >
+                <Text style={[styles.tabBtnText, activeTab === tab && styles.tabBtnTextActive]}>
+                  {labelMap[tab]}
+                </Text>
+              </Pressable>
+            )
+          })}
+        </View>
+  
+        {/* 차트 */}
+        {chartData.length > 0 ? (
+          <LineChart
+            data={chartData}
+            height={200}
+            color1='#6a9469'
+            thickness={2}
+            hideDataPoints={false}
+            dataPointsColor='#2c4a2c'
+            backgroundColor="#fff"
+            curved
+            yAxisTextStyle={{color: '#888', fontSize: 11}}
+            noOfSections={4}
+            initialSpacing={10}
           />
-          {(historyList?.length ?? 0) >= historyLimit &&(
-            <Pressable
-              style={styles.loadMoreBtn}
-              onPress={() => setHistoryLimit(prev => prev + 5)}
-            >
-              <Text style={styles.loadMoreText}>더 보기</Text>
-            </Pressable>
-          )}
-        </>
-
-      )}
-
-    </ScrollView>
+        ) : (
+          <Text style={styles.emptyText}>히스토리 데이터가 없습니다.</Text>
+        )}
+    
+        {/* 히스토리 */}
+        <Pressable style={styles.historyHeader} onPress={() => setIsHistoryOpen(prev => !prev)}>
+          <Text style={styles.sectionTitle}>📋 측정 히스토리</Text>
+          <Text style={styles.toggleIcon}>{isHistoryOpen ? '▲' : '▼'}</Text>
+        </Pressable>
+  
+        {isHistoryOpen && (
+          <>
+            <View style={styles.periodRow}>
+              {(['day', 'week', 'month'] as const).map(p => {
+                const labelMap = {day: '하루', week: '일주일', month: '한달'}
+                return(
+                  <Pressable
+                    key={p}
+                    style={[styles.periodBtn, historyPeriod === p && styles.periodBtnActive]}
+                    onPress={() => setHistoryPeriod(p)}
+                  >
+                    <Text style={[styles.periodBtnText, historyPeriod === p && styles.periodBtnTextActive]}>
+                      {labelMap[p]}
+                    </Text>
+                  </Pressable>
+                )
+              })}
+  
+            </View>
+            <FlatList
+              data={historyList}
+              keyExtractor={(item, index) => index.toString()}
+              scrollEnabled={false}
+              renderItem={({ item }: { item: SensorHistory }) => (
+                <View style={styles.historyCard}>
+                  <Text style={styles.historyDate}>{item.createDate}</Text>
+                  <View style={styles.historyRow}>
+                    <Text style={styles.historyItem}>🌡️ {item.tempC}°C</Text>
+                    <Text style={styles.historyItem}>💧 {item.humidity}%</Text>
+                    <Text style={styles.historyItem}>🌱 {item.soilMoistureValue}</Text>
+                    <Text style={styles.historyItem}>☀️ {item.ldrValue}</Text>
+                  </View>
+                </View>
+              )}
+            />
+            {(historyList?.length ?? 0) >= historyLimit &&(
+              <Pressable
+                style={styles.loadMoreBtn}
+                onPress={() => setHistoryLimit(prev => prev + 5)}
+              >
+                <Text style={styles.loadMoreText}>더 보기</Text>
+              </Pressable>
+            )}
+          </>
+  
+        )}
+  
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -258,7 +266,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f6f0',
     padding: 20,
-    paddingTop: 60,
   },
   title: {
     fontSize: 22,
@@ -459,4 +466,7 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   pressed: { opacity: 0.7 },
+  actuatorTextOn: {
+    color: '#fff'
+  }
 })

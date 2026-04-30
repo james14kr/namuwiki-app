@@ -9,7 +9,6 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import FarmerBar from '@/components/farmer-bar'
 import { getFollowList } from '@/api/follow.api'
 import { getCurrentUserEmail } from '@/utils/auth1'
-import { json } from 'zod'
 import * as Location from 'expo-location'
 import { getWeather } from '@/api/weather.api'
 import { Ionicons } from '@expo/vector-icons'
@@ -62,34 +61,84 @@ const getWeatherIcon = (main: string) => {
   }
 }
 
-const WeatherBanner = ({weather}: {weather: {temp: number; humidity: number; desc: string; main: string} | null}) => {
-  return(
+const WeatherBanner = ({weather}: {weather: {temp: number
+  tempMin: number
+  tempMax: number
+  feelsLike: number
+  humidity: number
+  windSpeed: number
+  clouds: number
+  desc: string
+  main: string
+  cityName: string} | null}) => {
+  // 날짜 포맷: "4월 30일 오후 2:30"
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const hours = now.getHours()
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  const ampm = hours >= 12 ? '오후' : '오전'
+  const displayHour = hours > 12 ? hours - 12 : hours
+  const dateStr = `${month}월 ${day}일 ${ampm} ${displayHour}:${minutes}`
+
+  return (
     <ImageBackground
       source={weather ? getWeatherImage(weather.main) : require('@/assets/images/clear.jpeg')}
       style={styles.weatherCard}
-      imageStyle={{borderRadius: 12}}
+      imageStyle={{ borderRadius: 16 }}
     >
       <View style={styles.weatherOverlay}>
-        <Text style={styles.weatherLabel}>오늘의 날씨</Text>
-        {weather ? (
-          <View style={styles.weatherRow}>
-            <View>
-              <Text style={styles.weatherTemp}>{weather.temp}°C</Text>
-              <Text style={styles.weatherHumidity}>{weather.humidity}%</Text>
-            </View>
-            <View style={styles.weatherIconGroup}>
-              <MaterialCommunityIcons
-                name={getWeatherIcon(weather.main) as any}
-                size={44}
-                color='#fff'
-              />
-              <Text style={styles.weatherDesc}>{weather.desc}</Text>
-            </View>
-           
+
+        {/* 상단: 도시명 + 최저/최고 */}
+        <View style={styles.weatherTop}>
+          <View>
+            <Text style={styles.weatherCity}>{weather?.cityName ?? '위치 불러오는 중'}</Text>
+            <Text style={styles.weatherDate}>{dateStr}</Text>
           </View>
-        ):(
+          {weather && (
+            <Text style={styles.weatherMinMax}>
+              L:{weather.tempMin}° H:{weather.tempMax}°
+            </Text>
+          )}
+        </View>
+
+        {/* 중간: 아이콘 + 기온 + 날씨 설명 */}
+        {weather ? (
+          <View style={styles.weatherMiddle}>
+            <MaterialCommunityIcons
+              name={getWeatherIcon(weather.main) as any}
+              size={52}
+              color="#fff"
+            />
+            <Text style={styles.weatherTemp}>{weather.temp}°</Text>
+            <Text style={styles.weatherDesc}>{weather.desc}</Text>
+          </View>
+        ) : (
           <Text style={styles.weatherLoading}>날씨 정보를 불러오는 중...</Text>
         )}
+
+        {/* 하단: 4개 칩 */}
+        {weather && (
+          <View style={styles.weatherChips}>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="water-percent" size={14} color="#fff" />
+              <Text style={styles.chipText}>{weather.humidity}%</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="weather-windy" size={14} color="#fff" />
+              <Text style={styles.chipText}>{weather.windSpeed}m/s</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="thermometer" size={14} color="#fff" />
+              <Text style={styles.chipText}>체감 {weather.feelsLike}°</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="weather-rainy" size={14} color="#fff" />
+              <Text style={styles.chipText}>구름 {weather.clouds}%</Text>
+            </View>
+          </View>
+        )}
+
       </View>
     </ImageBackground>
   )
@@ -102,9 +151,15 @@ const Home = () => {
   const [posts, setPosts] = useState<PostResponse[]>([])
   const [weather, setWeather] = useState <{
     temp: number
+    tempMin: number
+    tempMax: number
+    feelsLike: number
     humidity: number
+    windSpeed: number
+    clouds: number
     desc: string
     main: string
+    cityName: string
   } | null>(null)
 
   // 구독 중인 농장 목록
@@ -178,9 +233,15 @@ const Home = () => {
         const data = await getWeather(lat, lon)
         setWeather({
           temp: Math.round(data.main.temp),
+          tempMin: Math.round(data.main.temp_min),
+          tempMax: Math.round(data.main.temp_max),
+          feelsLike: Math.round(data.main.feels_like),
           humidity: data.main.humidity,
+          windSpeed: data.wind.speed,
+          clouds: data.clouds.all,
           desc: data.weather[0].description,
-          main: data.weather[0].main
+          main: data.weather[0].main,
+          cityName: data.name
         })
       } catch (e: any) {
         console.log('에러 발생:', e?.message)
@@ -251,7 +312,7 @@ const styles = StyleSheet.create({
     height: 50,
     bottom: 30,
     right: 20,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -281,47 +342,72 @@ const styles = StyleSheet.create({
   },
   weatherCard: {
     margin: 16,
-    padding: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    borderRadius: 12,
+    height: 180,
   },
   weatherOverlay: {
     flex: 1,
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',   // 반투명 오버레이
-    borderRadius: 12,
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderRadius: 16,
+    justifyContent: 'space-between',
   },
-  weatherLabel: {
-    fontSize: 12,
-    color: '#fff',
-    marginBottom: 8,
-  },
-  weatherRow: {
+  weatherTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  weatherTemp: {
-    fontSize: 28,
+  weatherCity: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
   },
-  weatherHumidity: {
-    fontSize: 14,
+  weatherDate: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  weatherMinMax: {
+    fontSize: 13,
     color: '#fff',
-    marginTop: 4,
+    fontWeight: '600',
+  },
+  weatherMiddle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  weatherTemp: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   weatherDesc: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#fff',
     fontWeight: '500',
   },
+  weatherChips: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  chipText: {
+    fontSize: 12,
+    color: '#fff',
+  },
   weatherLoading: {
     fontSize: 13,
-    color: '#6A9469',
+    color: 'rgba(255,255,255,0.8)',
   },
-  weatherIconGroup: {
-  alignItems: 'center',
-  gap: 4,
-},
+  
 })

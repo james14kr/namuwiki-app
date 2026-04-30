@@ -16,6 +16,7 @@ export interface PostResponse {
   viewCount : number;
   commentCount : number;
   memRole : string;
+  likeCount: number
 }
 
 export interface PostUpdateRequest {

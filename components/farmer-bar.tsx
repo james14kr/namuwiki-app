@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    height: 90
   },
   // 농장 아이콘들을 가로로 나열
   farmerBarContent: {
