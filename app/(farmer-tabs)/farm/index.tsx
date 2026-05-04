@@ -1,5 +1,5 @@
-import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, Animated } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
 import { getUserEmail, getUserNickName } from '@/utils/auth';
 import { useGetMyFarmList } from '@/queries/farm/useGetMyFarmList';
 import { FarmItem } from '@/types/farmType';
@@ -17,6 +17,28 @@ const Farm = () => {
   //1. farmerEmail 상태 선언
   const [farmerEmail, setFarmerEmail] = useState<string | null>(null);
   const [nickName, setNickname] = useState<string | null>(null);
+
+  const waveAnim = useRef(new Animated.Value(0)).current
+  const waveDrift1 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 18] })
+  ).current
+  const waveDrift2 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -12] })
+  ).current
+  const waveDrift3 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] })
+  ).current
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(waveAnim, { toValue: 1, duration: 4500, useNativeDriver: true }),
+        Animated.timing(waveAnim, { toValue: 0, duration: 4500, useNativeDriver: true }),
+      ])
+    )
+    loop.start()
+    return () => loop.stop()
+  }, [waveAnim])
 
   //2. 컴포넌트 마운트 시 이메일 불러오기
   useEffect(() => {
@@ -57,12 +79,15 @@ const Farm = () => {
   return (
     <SafeAreaView style={styles.container}>
 
-      <Text style={styles.header}>
-        {nickName}님의 농장 목록입니다
-      </Text>
-      <Text style={styles.subHeader}>
-        현재 {data.length}개의 농장이 스마트 시스템에 연결되어 있습니다.
-      </Text>
+      <View style={styles.header}>
+      <Animated.View style={[styles.blob1, { transform: [{ translateX: waveDrift1 }] }]} />
+      <Animated.View style={[styles.blob2, { transform: [{ translateX: waveDrift2 }] }]} />
+      <Animated.View style={[styles.blob3, { transform: [{ translateX: waveDrift3 }] }]} />
+      <View style={styles.headerContent}>
+        <Text style={styles.headerTitle}>{nickName}님의 농장</Text>
+        <Text style={styles.headerSubtitle}>현재 {data.length}개의 농장이 연결되어 있습니다</Text>
+      </View>
+      </View>
 
       <FlatList
         contentContainerStyle={{padding: 16}}
@@ -118,13 +143,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f4f6f0',  // 연한 녹색 배경
   },
-  header: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2C4A2C',
-    padding: 16,
-    paddingBottom: 8
-  },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -167,12 +185,7 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.8
   },
-  subHeader: {
-  fontSize: 13,
-    color: '#888',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
+
   addrRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -220,5 +233,37 @@ const styles = StyleSheet.create({
   emptySubText: {
     fontSize: 13,
     color: '#888',
+  },
+  header: {
+    height: 130,
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'flex-end',
+    paddingBottom: 18,
+    paddingHorizontal: 24,
+  },
+  blob1: {
+    position: 'absolute', width: 280, height: 280,
+    borderRadius: 140, backgroundColor: '#CCDECB',
+    top: -140, right: -60, opacity: 0.70,
+  },
+  blob2: {
+    position: 'absolute', width: 180, height: 180,
+    borderRadius: 90, backgroundColor: '#BDD5BC',
+    top: -80, right: 40, opacity: 0.45,
+  },
+  blob3: {
+    position: 'absolute', width: 130, height: 130,
+    borderRadius: 65, backgroundColor: '#E2F0E2',
+    bottom: -50, left: -20, opacity: 0.60,
+  },
+  headerContent: { zIndex: 10 },
+  headerTitle: {
+    fontSize: 28, fontWeight: '800',
+    color: '#1A2E1A', letterSpacing: 0.3,
+  },
+  headerSubtitle: {
+    fontSize: 13, color: '#8A9E8A', marginTop: 2,
   },
 })

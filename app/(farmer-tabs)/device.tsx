@@ -1,5 +1,5 @@
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, Animated, ScrollView } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
 import { useUnlinkDevice } from '@/queries/device/useUnlinkDevice'
 import { DeviceItem, DeviceRegisterData } from '@/types/deviceType'
 import { getUserEmail } from '@/utils'
@@ -75,20 +75,41 @@ const Device = () => {
     })
   }
 
+  const waveAnim = useRef(new Animated.Value(0)).current
+  const waveDrift1 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 18] })
+  ).current
+  const waveDrift2 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -12] })
+  ).current
+  const waveDrift3 = useRef(
+    waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] })
+  ).current
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(waveAnim, { toValue: 1, duration: 4500, useNativeDriver: true }),
+        Animated.timing(waveAnim, { toValue: 0, duration: 4500, useNativeDriver: true }),
+      ])
+    )
+    loop.start()
+    return () => loop.stop()
+  }, [waveAnim])
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f4f6f0' }}>
+
+      <View style={styles.header}>
+        <Animated.View style={[styles.blob1, { transform: [{ translateX: waveDrift1 }] }]} />
+        <Animated.View style={[styles.blob2, { transform: [{ translateX: waveDrift2 }] }]} />
+        <Animated.View style={[styles.blob3, { transform: [{ translateX: waveDrift3 }] }]} />
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>기기 등록</Text>
+          <Text style={styles.headerSubtitle}>농작물에 센서 기기를 연결하세요</Text>
+        </View>
+      </View>
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>📡 기기 등록</Text>
-  
-        {/* 기기 ID 입력 */}
-        <Text style={styles.label}>기기 ID</Text>
-        <TextInput
-          style={styles.input}
-          placeholder='기기 ID를 입력하세요'
-          value={device.deviceId}
-          onChangeText={(text) => setDevice({...device, deviceId: text})}
-          autoCapitalize='none'
-        />
   
         {/* 농장 선택 */}
         <Text style={styles.label}>농장 선택</Text>
@@ -271,5 +292,37 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     fontSize: 13,
     fontWeight: 'bold',
+  },
+  header: {
+    height: 130,
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'flex-end',
+    paddingBottom: 18,
+    paddingHorizontal: 24,
+  },
+  blob1: {
+    position: 'absolute', width: 280, height: 280,
+    borderRadius: 140, backgroundColor: '#CCDECB',
+    top: -140, right: -60, opacity: 0.70,
+  },
+  blob2: {
+    position: 'absolute', width: 180, height: 180,
+    borderRadius: 90, backgroundColor: '#BDD5BC',
+    top: -80, right: 40, opacity: 0.45,
+  },
+  blob3: {
+    position: 'absolute', width: 130, height: 130,
+    borderRadius: 65, backgroundColor: '#E2F0E2',
+    bottom: -50, left: -20, opacity: 0.60,
+  },
+  headerContent: { zIndex: 10 },
+  headerTitle: {
+    fontSize: 28, fontWeight: '800',
+    color: '#1A2E1A', letterSpacing: 0.3,
+  },
+  headerSubtitle: {
+    fontSize: 13, color: '#8A9E8A', marginTop: 2,
   },
 })
