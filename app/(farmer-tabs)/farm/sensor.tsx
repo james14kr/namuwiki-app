@@ -115,12 +115,12 @@ const Sensor = () => {
                 <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.fanStatus === 1 ? 'ON' : 'OFF'}</Text>
               </View>
               <View style={[styles.actuatorCard, sensorData.ledStatus === 1 && styles.actuatorOn]}>
-                <Text style={[styles.actuatorLabel, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>LED</Text>
-                <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.ledStatus === 1 ? 'ON' : 'OFF'}</Text>
+                <Text style={[styles.actuatorLabel, sensorData.ledStatus === 1 && styles.actuatorTextOn]}>LED</Text>
+                <Text style={[styles.actuatorStatus, sensorData.ledStatus === 1 && styles.actuatorTextOn]}>{sensorData.ledStatus === 1 ? 'ON' : 'OFF'}</Text>
               </View>
               <View style={[styles.actuatorCard, sensorData.pumpStatus === 1 && styles.actuatorOn]}>
-                <Text style={[styles.actuatorLabel, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>펌프</Text>
-                <Text style={[styles.actuatorStatus, sensorData.fanStatus === 1 && styles.actuatorTextOn]}>{sensorData.pumpStatus === 1 ? 'ON' : 'OFF'}</Text>
+                <Text style={[styles.actuatorLabel, sensorData.pumpStatus === 1 && styles.actuatorTextOn]}>펌프</Text>
+                <Text style={[styles.actuatorStatus, sensorData.pumpStatus === 1 && styles.actuatorTextOn]}>{sensorData.pumpStatus === 1 ? 'ON' : 'OFF'}</Text>
               </View>
             </View>
             <View style={styles.actuatorRow}>

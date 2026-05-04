@@ -150,7 +150,7 @@ export default function Profile() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 100 }} />
+        <ActivityIndicator size="large" color="#6A9469" style={{ marginTop: 100 }} />
       </SafeAreaView>
     )
   }
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
   // 히어로 배너
   heroBanner: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     paddingVertical: 36,
     alignItems: 'center',
     gap: 8,
@@ -420,14 +420,14 @@ const styles = StyleSheet.create({
   },
   tabActive: {
     borderBottomWidth: 2,
-    borderBottomColor: '#4CAF50',
+    borderBottomColor: '#6A9469',
   },
   tabText: {
     fontSize: 14,
     color: '#aaa',
   },
   tabTextActive: {
-    color: '#4CAF50',
+    color: '#6A9469',
     fontWeight: '700',
   },
 
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   commentPostTitle: {
     fontSize: 11,
-    color: '#4CAF50',
+    color: '#6A9469',
     marginBottom: 2,
   },
 
