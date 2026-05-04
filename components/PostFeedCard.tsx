@@ -95,50 +95,60 @@ const PostFeedCard = ({ post }: Props) => {
 
   return (
     <View style={styles.card}>
-      {/* 이미지 + 프사/닉네임 겹치기 */}
-      <Pressable onPress={handleImagePress}>
-        <View style={styles.imageWrapper}>
-          {imageUrl ? (
+
+      {/* 이미지 있을 때만 imageWrapper 렌더링 */}
+      {imageUrl ? (
+        <Pressable onPress={handleImagePress}>
+          <View style={styles.imageWrapper}>
             <Image
               source={{ uri: imageUrl }}
               style={styles.image}
               resizeMode="cover"
             />
-          ) : (
-            <View style={styles.noImage}>
-              <Text style={styles.noImageText}>이미지 없음</Text>
-            </View>
-          )}
-
-          {/* 프사 + 닉네임 - 이미지 좌상단 겹침 */}
-          <Pressable
-            style={styles.profileRow}
-            onPress={() => {
-              if (currentEmail === post.memEmail) return;
-              dmApi
-                .getOrCreateRoom({
-                  senderEmail: currentEmail!,
-                  receiverEmail: post.memEmail,
-                })
-                .then((room) => {
-                  router.push(`/dm/${room.id}` as any);
-                });
-            }}
-          >
-            <Image
-              source={
-                post.memProfileImg
-                  ? { uri: post.memProfileImg }
-                  : require("@/assets/images/default-profile.png")
-              }
-              style={styles.profileImg}
-            />
-            <Text style={styles.nickname}>
-              {post.memNickname ?? "알 수 없음"}
-            </Text>
-          </Pressable>
-        </View>
-      </Pressable>
+            {/* 프사 + 닉네임 - 이미지 좌상단 겹침 */}
+            <Pressable
+              style={styles.profileRow}
+              onPress={() => { /* 기존 DM 이동 로직 */ }}
+            >
+              <Image
+                source={
+                  post.memProfileImg
+                    ? { uri: post.memProfileImg }
+                    : require("@/assets/images/default-profile.png")
+                }
+                style={styles.profileImg}
+              />
+              <Text style={styles.nickname}>{post.memNickname ?? '알 수 없음'}</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      ) : (
+        // 이미지 없을 때 프로필 행만 별도 표시
+        <Pressable
+          style={styles.profileRowNoImage}
+          onPress={() => {
+            if (currentEmail === post.memEmail) return;
+            dmApi
+              .getOrCreateRoom({
+                senderEmail: currentEmail!,
+                receiverEmail: post.memEmail,
+              })
+              .then((room) => {
+                router.push(`/dm/${room.id}` as any);
+              });
+          }}
+        >
+          <Image
+            source={
+              post.memProfileImg
+                ? { uri: post.memProfileImg }
+                : require("@/assets/images/default-profile.png")
+            }
+            style={styles.profileImg}
+          />
+          <Text style={styles.nicknameNoImage}>{post.memNickname ?? '알 수 없음'}</Text>
+        </Pressable>
+      )}
 
       {/* 제목 + 더보기 */}
       <View style={styles.titleRow}>
@@ -151,7 +161,12 @@ const PostFeedCard = ({ post }: Props) => {
       </View>
 
       {/* 더보기 펼쳤을 때 본문 */}
-      {expanded && <Text style={styles.content}>{textContent}</Text>}
+      <Text
+        style={styles.content}
+        numberOfLines={expanded ? undefined : 2}
+      >
+        {textContent}
+      </Text>
 
       {/* 업로드 날짜 */}
       <Text style={styles.date}>{formatDate(post.createdAt)}</Text>
@@ -246,7 +261,7 @@ const styles = StyleSheet.create({
   },
   moreBtn: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: "#6A9469",
     fontWeight: "600",
   },
   content: {
@@ -279,5 +294,23 @@ const styles = StyleSheet.create({
   footerCount: {
     fontSize: 13,
     color: "#888",
+  },
+  profileRowNoImage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    paddingBottom: 4,
+  },
+  profileImgNoImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#eee',
+  },
+  nicknameNoImage: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
   },
 });
