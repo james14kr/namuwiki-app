@@ -281,6 +281,7 @@ const Home = () => {
         data={filteredPosts}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={<WeatherBanner weather={weather} />}
+        contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 12 }}
         renderItem={({ item }) => <PostFeedCard post={item} />}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}

@@ -99,6 +99,7 @@ const Home = () => {
       <FlatList
         data={filteredPosts}
         keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 12 }}
         renderItem={({ item }) => <PostFeedCard post={item} />}
 
         // 스크롤 끝에 도달 시 호출
