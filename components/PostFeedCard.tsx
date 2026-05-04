@@ -150,23 +150,25 @@ const PostFeedCard = ({ post }: Props) => {
         </Pressable>
       )}
 
-      {/* 제목 + 더보기 */}
+      {/* 제목만 */}
       <View style={styles.titleRow}>
         <Text style={styles.title} numberOfLines={1}>
           {post.title}
         </Text>
-        <Pressable onPress={() => setExpanded((prev) => !prev)}>
-          <Text style={styles.moreBtn}>{expanded ? "접기" : "더보기"}</Text>
-        </Pressable>
       </View>
 
-      {/* 더보기 펼쳤을 때 본문 */}
-      <Text
-        style={styles.content}
-        numberOfLines={expanded ? undefined : 2}
-      >
+      {/* 본문 */}
+      <Text style={styles.content} numberOfLines={expanded ? undefined : 2}>
         {textContent}
       </Text>
+
+      {/* 더보기 버튼 - 본문 아래 */}
+      <Pressable
+        onPress={() => setExpanded((prev) => !prev)}
+        style={styles.moreBtnWrap}
+      >
+        <Text style={styles.moreBtn}>{expanded ? "접기" : "더보기"}</Text>
+      </Pressable>
 
       {/* 업로드 날짜 */}
       <Text style={styles.date}>{formatDate(post.createdAt)}</Text>
@@ -312,5 +314,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#333',
+  },
+  moreBtnWrap: {
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    alignItems: 'flex-end',
   },
 });
