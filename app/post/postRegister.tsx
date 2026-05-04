@@ -33,6 +33,25 @@ const PostRegister = () => {
     getCurrentUserEmail().then(setCurrentEmail)
   }, [])
 
+  //선택된 프리셋 해시태그 목록
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+
+  //직접 입력 중인 태그
+  const [customTag, setCustomTag] = useState('')
+
+  const [category, setCategory] = useState<'농업인' | '소비자' | ''>('')
+
+  const PRESET_TAGS = [
+    '#스마트팜', '#질문', '#팁공유', '#수확',
+    '#병충해', '#기기관리', '#날씨', '#소비자후기'  
+  ]
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    )
+  }
+
 
 
 //////////     이미지     ////////////////////////
@@ -204,22 +223,25 @@ const PostRegister = () => {
     const contentJson = JSON.stringify({ type: 'doc', content: nodes })
 
     // 3단계: 게시글 등록 API 호출
+    // ✅ 수정
     await postApi.create({
       title,
       content: contentJson,
       memEmail: currentEmail,
+      hashtags: selectedTags.join(' ') || undefined,
+      category: category || undefined,
     })
 
     Alert.alert('완료', '게시글이 등록되었습니다.', [
       { text: '확인', onPress: () => router.back() },
-    ])
-  } catch (e) {
-    console.error('등록 오류', e)
-    Alert.alert('오류', '게시글 등록에 실패했습니다.')
-  } finally {
-    setLoading(false)
+      ])
+    } catch (e) {
+      console.error('등록 오류', e)
+      Alert.alert('오류', '게시글 등록에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
 
 
@@ -281,6 +303,75 @@ const PostRegister = () => {
             onChangeText={setContent}
             multiline // 여러줄 작성
           />
+        </View>
+
+        {/* 해시태그 */}
+        <Text style={styles.tagLabel}>해시태그</Text>
+
+        {/* 프리셋 태그 */}
+        <View style={styles.tagPresetRow}>
+          {PRESET_TAGS.map(tag => (
+            <Pressable
+              key={tag}
+              style={[styles.tagChip, selectedTags.includes(tag) && styles.tagChipActive]}
+              onPress={() => toggleTag(tag)}
+            >
+              <Text style={[styles.tagChipText, selectedTags.includes(tag) && styles.tagChipTextActive]}>
+                {tag}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* 직접 입력 */}
+        <View style={styles.customTagRow}>
+          <Input
+            style={styles.customTagInput}
+            placeholder='직접 입력 (예: #토마토)'
+            value={customTag}
+            onChangeText={setCustomTag}
+          />
+          <Pressable
+            style={styles.customTagAddBtn}
+            onPress={() => {
+              const trimmed = customTag.trim()
+              if (!trimmed) return
+              const tag = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+              if (!selectedTags.includes(tag)) {
+                setSelectedTags(prev => [...prev, tag])
+              }
+              setCustomTag('')
+            }}
+          >
+            <Text style={styles.customTagAddText}>추가</Text>
+          </Pressable>
+        </View>
+
+        {/* 선택된 태그 미리보기 */}
+        {selectedTags.length > 0 && (
+          <View style={styles.selectedTagRow}>
+            {selectedTags.map(tag => (
+              <Pressable key={tag} style={styles.selectedChip} onPress={() => toggleTag(tag)}>
+                <Text style={styles.selectedChipText}>{tag} ✕</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {/* 카테고리 */}
+        <Text style={styles.tagLabel}>카테고리</Text>
+        <View style={styles.categoryRow}>
+          {(['농업인', '소비자'] as const).map((cat) => (
+            <Pressable
+              key={cat}
+              style={[styles.tagChip, category === cat && styles.tagChipActive]}
+              onPress={() => setCategory(prev => prev === cat ? '' : cat)}
+            >
+              <Text style={[styles.tagChipText, category === cat && styles.tagChipTextActive]}>
+                {cat}
+              </Text>
+            </Pressable>
+          ))}
         </View>
 
       <Pressable
@@ -396,7 +487,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   registerBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -407,4 +498,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  tagLabel: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 12 },
+  tagPresetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
+  tagChip: {
+    paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 20, borderWidth: 1, borderColor: '#ddd',
+    backgroundColor: '#f5f5f5',
+  },
+  tagChipActive: { backgroundColor: '#6A9469', borderColor: '#6A9469' },
+  tagChipText: { fontSize: 13, color: '#666' },
+  tagChipTextActive: { color: '#fff', fontWeight: '600' },
+  customTagRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+  customTagInput: {
+    flex: 1, borderWidth: 1, borderColor: '#e0e0e0',
+    borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 14, backgroundColor: '#fafafa',
+  },
+  customTagAddBtn: {
+    backgroundColor: '#6A9469', borderRadius: 8,
+    paddingHorizontal: 16, justifyContent: 'center',
+  },
+  customTagAddText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  selectedTagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
+  selectedChip: {
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 20, backgroundColor: '#e8f5e8',
+  },
+  selectedChipText: { fontSize: 12, color: '#2C4A2C', fontWeight: '600' },
+  categoryRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
 })

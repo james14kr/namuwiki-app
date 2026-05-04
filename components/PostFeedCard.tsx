@@ -170,6 +170,15 @@ const PostFeedCard = ({ post }: Props) => {
         <Text style={styles.moreBtn}>{expanded ? "접기" : "더보기"}</Text>
       </Pressable>
 
+      {/* 해시태그 */}
+      {post.hashtags && (
+        <View style={styles.hashtagRow}>
+          {post.hashtags.split(' ').map((tag) => (
+            <Text key={tag} style={styles.hashtagChip}>{tag}</Text>
+          ))}
+        </View>
+      )}
+
       {/* 업로드 날짜 */}
       <Text style={styles.date}>{formatDate(post.createdAt)}</Text>
 
@@ -322,5 +331,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 4,
     alignItems: 'flex-end',
+  },
+    hashtagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingTop: 6,
+  },
+  hashtagChip: {
+    fontSize: 12,
+    color: '#6A9469',
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
 });

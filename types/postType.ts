@@ -2,6 +2,8 @@ export interface PostRequest {
   title: string;
   content: string;
   memEmail: string | null;
+  hashtags?: string;  
+  category?: string;  
 }
 
 export interface PostResponse {
@@ -17,6 +19,8 @@ export interface PostResponse {
   commentCount : number;
   memRole : string;
   likeCount: number
+  hashtags?: string;  
+  category?: string;  
 }
 
 export interface PostUpdateRequest {
