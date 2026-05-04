@@ -245,7 +245,7 @@ export default function Profile() {
                     <Text style={styles.activityDate}>{formatDate(post.createdAt)}</Text>
                     <View style={styles.activityMeta}>
                       <Ionicons name="heart-outline" size={12} color="#aaa" />
-                      <Text style={styles.activityMetaText}>{post.commentCount ?? 0}</Text>
+                      <Text style={styles.activityMetaText}>{post.likeCount ?? 0}</Text>
                       <Ionicons name="chatbubble-outline" size={12} color="#aaa" style={{ marginLeft: 8 }} />
                       <Text style={styles.activityMetaText}>{post.commentCount ?? 0}</Text>
                     </View>
@@ -268,7 +268,7 @@ export default function Profile() {
                   onPress={() => router.push(`/post/${comment.postId}` as any)}
                 >
                   <View style={styles.commentIconWrapper}>
-                    <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                    <Ionicons name="chatbubble-outline" size={20} color="#6A9469" />
                   </View>
                   <View style={styles.activityContent}>
                     {/* 어느 게시글에 단 댓글인지 */}
