@@ -21,7 +21,6 @@ import type { PostResponse } from '@/types/postType'
 import type { CommentResponse } from '@/types/commentType'
 import { getCurrentUserEmail } from '@/utils/auth1'
 import { api } from '@/utils/axios'
-import axios from 'axios'
 
 // S3 이미지 업로드
 const uploadImageToS3 = async (uri: string): Promise<string> => {
@@ -273,7 +272,7 @@ export default function Profile() {
                   <View style={styles.activityContent}>
                     {/* 어느 게시글에 단 댓글인지 */}
                     <Text style={styles.commentPostTitle} numberOfLines={1}>
-                      📄 {(comment as any).postTitle ?? '게시글'}
+                      📄 {comment.postTitle ?? '게시글'}
                     </Text>
                     <Text style={styles.activityTitle} numberOfLines={2}>{comment.content}</Text>
                     <Text style={styles.activityDate}>{formatDate(comment.createdAt)}</Text>

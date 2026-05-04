@@ -1,5 +1,4 @@
 import { api } from "@/utils/axios";
-import axios from "axios";
 import type { MemInfoDTO } from "@/types/memberType";
 
 export const memberApi = {
