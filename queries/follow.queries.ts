@@ -1,19 +1,27 @@
 import { deleteFollow, getFollowerList, getFollowList, postFollow } from "@/api/follow.api";
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 //팔로우
 export const usePostFollow = () => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn : (data: {followerEmail : string; farmerEmail : string}) => 
       postFollow(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['followList']})
+    }
   })
 }
 
 //언팔로우
 export const useDeleteFollow = () => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn : (data : {followerEmail : string; farmerEmail : string}) => 
       deleteFollow(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['followList']})
+    }
   })
 }
 

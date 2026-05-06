@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   // 선택된 농장 - 초록 테두리
   farmerCircleSelected: {
-    borderColor: '#4CAF50',
+    borderColor: '#6A9469',
   },
   // 프로필 이미지 없을 때 표시되는 텍스트
   farmerCircleText: {

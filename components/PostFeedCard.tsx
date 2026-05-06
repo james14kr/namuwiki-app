@@ -1,9 +1,11 @@
 import { dmApi } from "@/api/dm.api";
+import { getCheckFollow, postFollow, deleteFollow } from "@/api/follow.api";
 import { postApi } from "@/api/post.api";
 import type { PostResponse } from "@/types/postType";
 import { getCurrentUserEmail } from "@/utils/auth1";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
@@ -55,6 +57,8 @@ const PostFeedCard = ({ post }: Props) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false)
+  const queryClient = useQueryClient();
 
   // 자신이 쓴 게시물말 수정 삭제 권한
   const [currentEmail, setCurrentEmail] = useState<string | null>(null);
@@ -69,11 +73,16 @@ const PostFeedCard = ({ post }: Props) => {
         const likeData = await postApi.getLikeStatus(post.id, email ?? "");
         setLiked(likeData.liked);
         setLikeCount(likeData.likeCount);
+        if(email && email !== post.memEmail){
+          const result = await getCheckFollow({followerEmail: email, farmerEmail: post.memEmail})
+          setIsFollowing(result > 0)
+        };
       } catch {
         // 실패해도 0 유지
       }
     };
     loadLikeStatus();
+    
   }, [post.id]);
 
   // 좋아요 토글
@@ -92,6 +101,22 @@ const PostFeedCard = ({ post }: Props) => {
   const handleImagePress = () => {
     router.push(`/post/${post.id}` as any);
   };
+
+  const handleFollow = async () => {
+    if(!currentEmail) return;
+    try{
+      if(isFollowing){
+        await deleteFollow({followerEmail: currentEmail, farmerEmail: post.memEmail})
+        setIsFollowing(false)
+      }else{
+        await postFollow({followerEmail: currentEmail, farmerEmail: post.memEmail})
+        setIsFollowing(true)
+      }
+      queryClient.invalidateQueries({queryKey: ['followList']})
+    }catch(e){
+      console.error('팔로우 오류', e)
+    }
+  }
 
   return (
     <View style={styles.card}>
@@ -124,30 +149,30 @@ const PostFeedCard = ({ post }: Props) => {
         </Pressable>
       ) : (
         // 이미지 없을 때 프로필 행만 별도 표시
-        <Pressable
-          style={styles.profileRowNoImage}
-          onPress={() => {
-            if (currentEmail === post.memEmail) return;
-            dmApi
-              .getOrCreateRoom({
-                senderEmail: currentEmail!,
-                receiverEmail: post.memEmail,
-              })
-              .then((room) => {
-                router.push(`/dm/${room.id}` as any);
-              });
-          }}
-        >
-          <Image
-            source={
-              post.memProfileImg
-                ? { uri: post.memProfileImg }
-                : require("@/assets/images/default-profile.png")
-            }
-            style={styles.profileImg}
-          />
-          <Text style={styles.nicknameNoImage}>{post.memNickname ?? '알 수 없음'}</Text>
-        </Pressable>
+        <View style={styles.profileRowNoImage}>
+          <Pressable
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+            onPress={() => {
+              if (currentEmail === post.memEmail) return;
+              dmApi.getOrCreateRoom({ senderEmail: currentEmail!, receiverEmail: post.memEmail })
+                .then((room) => { router.push(`/dm/${room.id}` as any); });
+            }}
+          >
+            <Image
+              source={post.memProfileImg ? { uri: post.memProfileImg } : require("@/assets/images/default-profile.png")}
+              style={styles.profileImgNoImage}
+            />
+            <Text style={styles.nicknameNoImage}>{post.memNickname ?? '알 수 없음'}</Text>
+          </Pressable>
+
+          {currentEmail && currentEmail !== post.memEmail && (
+            <Pressable onPress={handleFollow} style={[styles.followBtn, isFollowing && styles.followingBtn]}>
+              <Text style={[styles.followBtnText, isFollowing && styles.followingBtnText]}>
+                {isFollowing ? '팔로잉' : '팔로우'}
+              </Text>
+            </Pressable>
+          )}
+        </View>
       )}
 
       {/* 제목만 */}
@@ -312,6 +337,7 @@ const styles = StyleSheet.create({
   profileRowNoImage: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
     padding: 12,
     paddingBottom: 4,
@@ -347,5 +373,23 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  followBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#6A9469',
+  },
+  followingBtn: {
+    backgroundColor: '#6A9469',
+  },
+  followBtnText: {
+    fontSize: 12,
+    color: '#6A9469',
+    fontWeight: '600',
+  },
+  followingBtnText: {
+    color: '#fff',
   },
 });

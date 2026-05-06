@@ -7,9 +7,8 @@ import PostFeedCard from '@/components/PostFeedCard'
 import { AntDesign } from '@expo/vector-icons'
 import { useFocusEffect, useRouter } from 'expo-router'
 import FarmerBar from '@/components/farmer-bar'
-import { getFollowList } from '@/api/follow.api'
 import { getCurrentUserEmail } from '@/utils/auth1'
-import { json } from 'zod'
+import { useGetFollowList } from '@/queries/follow.queries'
 
 // 팔로우 타입 - follow.api 응답 구조에 맞게 정의
 interface FollowItem {
@@ -26,33 +25,19 @@ const Home = () => {
   // 전체 게시글 목록
   const [posts, setPosts] = useState<PostResponse[]>([])
 
-  // 구독 중인 농장 목록
-  const [followList, setFollowList] = useState<FollowItem[]>([])
-
   // 현재 선택된 농장 이메일 (null이면 전체 게시글 표시)
   const [selectedFarmer, setSelectedFarmer] = useState<string | null>(null)
 
   // 현재 보여줄 게시글 수
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE)
 
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null)
 
-  // ── 구독 농장 목록 로드 ──
-  // 로그인한 유저의 이메일로 팔로우 목록 조회
-  // 앱 최초 실행 시 한 번만 실행 (빈 의존성 배열)
   useEffect(() => {
-    const loadFollowList = async () => {
-      try {
-        const email = await getCurrentUserEmail()
-        if (!email) return
-        const data = await getFollowList(email)
-        console.log(`팔로우 목록 : `, JSON.stringify(data))
-        setFollowList(data)
-      } catch (e) {
-        console.error('팔로우 목록 오류', e)
-      }
-    }
-    loadFollowList()
+    getCurrentUserEmail().then(setCurrentEmail)
   }, [])
+
+  const {data: followList = []} = useGetFollowList(currentEmail ?? '')
 
   // ── 게시글 목록 로드 ──
   // useFocusEffect: 화면에 포커스가 올 때마다 실행
@@ -133,7 +118,7 @@ const styles = StyleSheet.create({
     height: 50,
     bottom: 30,
     right: 20,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#6A9469',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
