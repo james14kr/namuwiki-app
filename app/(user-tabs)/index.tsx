@@ -11,7 +11,7 @@ import { getCurrentUserEmail } from '@/utils/auth1'
 import { useGetFollowList } from '@/queries/follow.queries'
 import {getWeather} from '@/api/weather.api'
 import * as Location from 'expo-location'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 
 // 팔로우 타입 - follow.api 응답 구조에 맞게 정의
 interface FollowItem {
@@ -205,6 +205,20 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
 
+      {/* 헤더 */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
+        <View style={styles.headerIcons}>
+          <Pressable>
+            <Ionicons name="search-outline" size={24} color="#2C4A2C" />
+          </Pressable>
+          <Pressable>
+            <Ionicons name="notifications-outline" size={24} color="#2C4A2C" />
+          </Pressable>
+        </View>
+      </View>
+
+
       {/* // 상단에 구독 농장 바 고정 */}
       
       <FarmerBar
@@ -277,4 +291,23 @@ const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, gap: 4 },
   chipText: { fontSize: 12, color: '#fff' },
   weatherLoading: { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  logo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C4A2C',
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
 })
