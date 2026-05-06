@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { FlatList, Pressable, StyleSheet } from 'react-native'
+import { FlatList, Pressable, StyleSheet, ImageBackground, View, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { postApi } from '@/api/post.api'
 import type { PostResponse } from '@/types/postType'
@@ -9,6 +9,9 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import FarmerBar from '@/components/farmer-bar'
 import { getCurrentUserEmail } from '@/utils/auth1'
 import { useGetFollowList } from '@/queries/follow.queries'
+import {getWeather} from '@/api/weather.api'
+import * as Location from 'expo-location'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 // 팔로우 타입 - follow.api 응답 구조에 맞게 정의
 interface FollowItem {
@@ -18,6 +21,104 @@ interface FollowItem {
 }
 
 const PAGE_SIZE = 5
+const getWeatherImage = (main: string) => {
+  switch(main) {
+    case 'Clear':
+      return require('@/assets/images/clear.jpeg')
+    case 'Clouds':
+    case 'Mist':
+    case 'Fog':
+    case 'Haze':
+      return require('@/assets/images/clouds.jpeg')
+    case 'Rain':
+    case 'Drizzle':
+    case 'Thunderstorm':
+      return require('@/assets/images/rain.jpeg')
+    case 'Snow':
+      return require('@/assets/images/snow.jpeg')
+    default:
+      return require('@/assets/images/clear.jpeg')
+  }
+}
+
+const getWeatherIcon = (main: string) => {
+  switch(main) {
+    case 'Clear': return 'weather-sunny'
+    case 'Clouds':
+    case 'Mist':
+    case 'Fog':
+    case 'Haze': return 'weather-cloudy'
+    case 'Rain':
+    case 'Drizzle':
+    case 'Thunderstorm': return 'weather-rainy'
+    case 'Snow': return 'weather-snowy'
+    default: return 'weather-sunny'
+  }
+}
+
+const WeatherBanner = ({weather}: {weather: {
+  temp: number; tempMin: number; tempMax: number
+  feelsLike: number; humidity: number; windSpeed: number
+  clouds: number; desc: string; main: string; cityName: string
+} | null}) => {
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const hours = now.getHours()
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  const ampm = hours >= 12 ? '오후' : '오전'
+  const displayHour = hours > 12 ? hours - 12 : hours
+  const dateStr = `${month}월 ${day}일 ${ampm} ${displayHour}:${minutes}`
+
+  return (
+    <ImageBackground
+      source={weather ? getWeatherImage(weather.main) : require('@/assets/images/clear.jpeg')}
+      style={styles.weatherCard}
+      imageStyle={{ borderRadius: 16 }}
+    >
+      <View style={styles.weatherOverlay}>
+        <View style={styles.weatherTop}>
+          <View>
+            <Text style={styles.weatherCity}>{weather?.cityName ?? '위치 불러오는 중'}</Text>
+            <Text style={styles.weatherDate}>{dateStr}</Text>
+          </View>
+          {weather && (
+            <Text style={styles.weatherMinMax}>L:{weather.tempMin}° H:{weather.tempMax}°</Text>
+          )}
+        </View>
+        {weather ? (
+          <View style={styles.weatherMiddle}>
+            <MaterialCommunityIcons name={getWeatherIcon(weather.main) as any} size={52} color="#fff" />
+            <Text style={styles.weatherTemp}>{weather.temp}°</Text>
+            <Text style={styles.weatherDesc}>{weather.desc}</Text>
+          </View>
+        ) : (
+          <Text style={styles.weatherLoading}>날씨 정보를 불러오는 중...</Text>
+        )}
+        {weather && (
+          <View style={styles.weatherChips}>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="water-percent" size={14} color="#fff" />
+              <Text style={styles.chipText}>{weather.humidity}%</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="weather-windy" size={14} color="#fff" />
+              <Text style={styles.chipText}>{weather.windSpeed}m/s</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="thermometer" size={14} color="#fff" />
+              <Text style={styles.chipText}>체감 {weather.feelsLike}°</Text>
+            </View>
+            <View style={styles.chip}>
+              <MaterialCommunityIcons name="weather-rainy" size={14} color="#fff" />
+              <Text style={styles.chipText}>구름 {weather.clouds}%</Text>
+            </View>
+          </View>
+        )}
+      </View>
+    </ImageBackground>
+  )
+}
 
 const Home = () => {
   const router = useRouter()
@@ -33,11 +134,46 @@ const Home = () => {
 
   const [currentEmail, setCurrentEmail] = useState<string | null>(null)
 
+  const [weather, setWeather] = useState<{
+    temp: number; tempMin: number; tempMax: number
+    feelsLike: number; humidity: number; windSpeed: number
+    clouds: number; desc: string; main: string; cityName: string
+  } | null>(null) 
+
   useEffect(() => {
     getCurrentUserEmail().then(setCurrentEmail)
   }, [])
 
   const {data: followList = []} = useGetFollowList(currentEmail ?? '')
+
+  useEffect(() => {
+  const loadWeather = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') return
+      let coords = await Location.getLastKnownPositionAsync()
+      const lat = coords?.coords.latitude ?? 37.5665
+      const lon = coords?.coords.longitude ?? 126.9780
+      const data = await getWeather(lat, lon)
+      setWeather({
+        temp: Math.round(data.main.temp),
+        tempMin: Math.round(data.main.temp_min),
+        tempMax: Math.round(data.main.temp_max),
+        feelsLike: Math.round(data.main.feels_like),
+        humidity: data.main.humidity,
+        windSpeed: data.wind.speed,
+        clouds: data.clouds.all,
+        desc: data.weather[0].description,
+        main: data.weather[0].main,
+        cityName: data.name
+      })
+    } catch (e: any) {
+      console.log('에러 발생:', e?.message)
+    }
+  }
+    loadWeather()
+  }, [])
+  
 
   // ── 게시글 목록 로드 ──
   // useFocusEffect: 화면에 포커스가 올 때마다 실행
@@ -84,6 +220,7 @@ const Home = () => {
       <FlatList
         data={filteredPosts}
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={<WeatherBanner weather={weather} />}
         contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 12 }}
         renderItem={({ item }) => <PostFeedCard post={item} />}
 
@@ -127,4 +264,17 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.8,
   },
+  weatherCard: { marginBottom: 10, borderRadius: 16, overflow: 'hidden', height: 180 },
+  weatherOverlay: { flex: 1, padding: 16, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 16, justifyContent: 'space-between' },
+  weatherTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  weatherCity: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
+  weatherDate: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  weatherMinMax: { fontSize: 13, color: '#fff', fontWeight: '600' },
+  weatherMiddle: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  weatherTemp: { fontSize: 48, fontWeight: 'bold', color: '#fff' },
+  weatherDesc: { fontSize: 16, color: '#fff', fontWeight: '500' },
+  weatherChips: { flexDirection: 'row', gap: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, gap: 4 },
+  chipText: { fontSize: 12, color: '#fff' },
+  weatherLoading: { fontSize: 13, color: 'rgba(255,255,255,0.8)' },
 })
