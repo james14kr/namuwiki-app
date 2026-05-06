@@ -6,5 +6,6 @@ export const useGetMyDevices = (farmerEmail : string) => {
     queryKey: ["myDevices", farmerEmail],
     queryFn: () => getMyDevices(farmerEmail),
     enabled: !!farmerEmail,
+    refetchInterval: 30000, // 30초마다 자동 갱신
   })
 } 
