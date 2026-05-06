@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 // content JSON에서 첫 번째 이미지 URL 추출
 const getFirstImageUrl = (content: string): string | null => {
@@ -108,9 +109,11 @@ const PostFeedCard = ({ post }: Props) => {
       if(isFollowing){
         await deleteFollow({followerEmail: currentEmail, farmerEmail: post.memEmail})
         setIsFollowing(false)
+        Toast.show({type: 'success', text1: `${post.memNickname}님을 언팔로우했습니다.`})
       }else{
         await postFollow({followerEmail: currentEmail, farmerEmail: post.memEmail})
         setIsFollowing(true)
+        Toast.show({type: 'success', text1: `${post.memNickname}님을 팔로우헀습니다.`})
       }
       queryClient.invalidateQueries({queryKey: ['followList']})
     }catch(e){
