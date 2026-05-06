@@ -179,11 +179,11 @@ const PostFeedCard = ({ post }: Props) => {
       )}
 
       {/* 제목만 */}
-      <View style={styles.titleRow}>
+      <Pressable style={styles.titleRow} onPress={handleImagePress}>
         <Text style={styles.title} numberOfLines={1}>
           {post.title}
         </Text>
-      </View>
+      </Pressable>
 
       {/* 본문 */}
       <Text style={styles.content} numberOfLines={expanded ? undefined : 2}>
