@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, Animated, ScrollView } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, Animated, ScrollView, TextInput } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { useUnlinkDevice } from '@/queries/device/useUnlinkDevice'
 import { DeviceItem, DeviceRegisterData } from '@/types/deviceType'
@@ -147,6 +147,15 @@ const Device = () => {
             </View>
           </>
         )}
+
+        {/* 기기 ID 입력 */}
+        <Text style={styles.label}>기기 ID</Text>
+        <TextInput
+          style={styles.input}
+          placeholder='기기 ID를 입력하세요'
+          value={device.deviceId}
+          onChangeText={(text) => setDevice(prev => ({...prev, deviceId: text}))}
+        />
   
         <Pressable style={styles.submitBtn} onPress={handleSubmit}>
          <Text style={styles.submitText}>등록하기</Text>

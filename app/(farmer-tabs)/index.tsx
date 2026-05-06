@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   weatherCard: {
-    margin: 16,
+    marginBottom: 10,
     borderRadius: 16,
     overflow: 'hidden',
     height: 180,
