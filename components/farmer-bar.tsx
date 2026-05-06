@@ -18,66 +18,72 @@ interface Props {
 const FarmerBar = ({ followList, selectedFarmer, onSelect }: Props) => {
   return (
     // 가로 스크롤 가능한 농장 바
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.farmerBar}
-      contentContainerStyle={styles.farmerBarContent}
-    >
-      {/* 전체 보기 버튼 - 눌리면 selectedFarmer가 null이 되어 전체 게시글 표시 */}
-      <Pressable style={styles.farmerItem} onPress={() => onSelect(null)}>
-        <View style={[
-          styles.farmerCircle,
-          // 전체가 선택됐을 때 초록 테두리
-          selectedFarmer === null && styles.farmerCircleSelected
-        ]}>
-          <Text style={styles.farmerCircleText}>전체</Text>
-        </View>
-      </Pressable>
-
-      {/* 구독 농장 목록 - 각 농장을 원형 아이콘으로 표시 */}
-      {followList.map((farmer) => (
-        <Pressable
-          key={farmer.farmerEmail}
-          style={styles.farmerItem}
-          onPress={() => onSelect(farmer.farmerEmail)}
-        >
+    <View style={styles.farmerBarContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.farmerBar}
+        contentContainerStyle={styles.farmerBarContent}
+      >
+        {/* 전체 보기 버튼 - 눌리면 selectedFarmer가 null이 되어 전체 게시글 표시 */}
+        <Pressable style={styles.farmerItem} onPress={() => onSelect(null)}>
           <View style={[
             styles.farmerCircle,
-            // 해당 농장이 선택됐을 때 초록 테두리
-            selectedFarmer === farmer.farmerEmail && styles.farmerCircleSelected
+            // 전체가 선택됐을 때 초록 테두리
+            selectedFarmer === null && styles.farmerCircleSelected
           ]}>
-            {/* 프로필 이미지가 있으면 이미지, 없으면 닉네임 첫 글자 */}
-            {farmer.farmerProfileImg ? (
-              <Image
-                source={{ uri: farmer.farmerProfileImg }}
-                style={styles.farmerImg}
-              />
-            ) : (
-              <Text style={styles.farmerCircleText}>
-                {farmer.farmerNickname?.[0] ?? '?'}
-              </Text>
-            )}
+            <Text style={styles.farmerCircleText}>전체</Text>
           </View>
-          {/* 농장 닉네임 - 길면 말줄임표 */}
-          <Text style={styles.farmerLabel} numberOfLines={1}>
-            {farmer.farmerNickname}
-          </Text>
         </Pressable>
-      ))}
-    </ScrollView>
+  
+        {/* 구독 농장 목록 - 각 농장을 원형 아이콘으로 표시 */}
+        {followList.map((farmer) => (
+          <Pressable
+            key={farmer.farmerEmail}
+            style={styles.farmerItem}
+            onPress={() => onSelect(farmer.farmerEmail)}
+          >
+            <View style={[
+              styles.farmerCircle,
+              // 해당 농장이 선택됐을 때 초록 테두리
+              selectedFarmer === farmer.farmerEmail && styles.farmerCircleSelected
+            ]}>
+              {/* 프로필 이미지가 있으면 이미지, 없으면 닉네임 첫 글자 */}
+              {farmer.farmerProfileImg ? (
+                <Image
+                  source={{ uri: farmer.farmerProfileImg }}
+                  style={styles.farmerImg}
+                />
+              ) : (
+                <Text style={styles.farmerCircleText}>
+                  {farmer.farmerNickname?.[0] ?? '?'}
+                </Text>
+              )}
+            </View>
+            {/* 농장 닉네임 - 길면 말줄임표 */}
+            <Text style={styles.farmerLabel} numberOfLines={1}>
+              {farmer.farmerNickname}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
   )
 }
 
 export default FarmerBar
 
 const styles = StyleSheet.create({
-  // 농장 바 전체 컨테이너
-  farmerBar: {
+  farmerBarContainer: {
+    height: 90,
+    overflow: 'hidden',
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    height: 120,
+  },
+  // 농장 바 전체 컨테이너
+  farmerBar: {
+    backgroundColor: '#fff',
   },
   // 농장 아이콘들을 가로로 나열
   farmerBarContent: {
