@@ -98,6 +98,7 @@ export default function DmRoom() {
       onConnect: () => {
         client.subscribe(`/sub/dm/room/${roomId}`, (message) => {
           const newMessage: ChatMessageDTO = JSON.parse(message.body);
+          console.log("수신 메시지:", newMessage);
           setMessages((prev) => [...prev, newMessage]);
         });
       },
