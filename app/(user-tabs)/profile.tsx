@@ -8,6 +8,8 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Modal,
+  FlatList,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -21,6 +23,8 @@ import type { PostResponse } from '@/types/postType'
 import type { CommentResponse } from '@/types/commentType'
 import { getCurrentUserEmail } from '@/utils/auth1'
 import { api } from '@/utils/axios'
+import { useGetFollowerList, useGetFollowList } from '@/queries/follow.queries'
+import { FollowerItem, FollowItem } from '@/types/followType'
 
 // S3 이미지 업로드
 const uploadImageToS3 = async (uri: string): Promise<string> => {
@@ -76,12 +80,20 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false)
   // 활동기록 탭 (posts / comments)
   const [activeTab, setActiveTab] = useState<'posts' | 'comments'>('posts')
+  
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [showFollowModal, setShowFollowModal] = useState(false)
+  const [followModalTab, setFollowModalTab] = useState<'following' | 'followers'>('following')
+
+  const {data: followingList = []} = useGetFollowList(userEmail ?? '')
+  const {data: followerList = []} = useGetFollowerList(userEmail ?? '')
 
   useEffect(() => {
     const load = async () => {
       try {
         const email = await getCurrentUserEmail()
         if (!email) return
+        setUserEmail(email)
         const [info, posts, comments] = await Promise.all([
           memberApi.getMemInfo(email),
           memberApi.getMyPosts(email),
@@ -181,6 +193,25 @@ export default function Profile() {
           <Text style={styles.heroRole}>
             {memInfo?.memRole === 'FARMER' ? '🌱 농장주' : memInfo?.memRole === 'ADMIN' ? '👑 관리자' : '🌿 일반 회원'}
           </Text>
+
+          {/* 팔로잉 / 팔로워 통계 */}
+          <View style={styles.heroStats}>
+            <Pressable
+              style={styles.heroStatItem}
+              onPress={() => { setFollowModalTab('following'); setShowFollowModal(true) }}
+            >
+              <Text style={styles.heroStatCount}>{(followingList as FollowItem[]).length}</Text>
+              <Text style={styles.heroStatLabel}>팔로잉</Text>
+            </Pressable>
+            <View style={styles.heroStatDivider} />
+            <Pressable
+              style={styles.heroStatItem}
+              onPress={() => { setFollowModalTab('followers'); setShowFollowModal(true) }}
+            >
+              <Text style={styles.heroStatCount}>{(followerList as FollowerItem[]).length}</Text>
+              <Text style={styles.heroStatLabel}>팔로워</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* 기본 정보 카드 */}
@@ -291,9 +322,95 @@ export default function Profile() {
         </Pressable>
 
       </ScrollView>
+
+      {/* 팔로잉/팔로워 모달 */}
+      <Modal
+        visible={showFollowModal}
+        animationType="slide"
+        onRequestClose={() => setShowFollowModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          {/* 헤더 */}
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>팔로우</Text>
+            <Pressable onPress={() => setShowFollowModal(false)} style={styles.modalClose}>
+              <Ionicons name="close" size={24} color="#333" />
+            </Pressable>
+          </View>
+
+          {/* 탭 */}
+          <View style={styles.modalTabRow}>
+            <Pressable
+              style={[styles.modalTab, followModalTab === 'following' && styles.modalTabActive]}
+              onPress={() => setFollowModalTab('following')}
+            >
+              <Text style={[styles.modalTabText, followModalTab === 'following' && styles.modalTabTextActive]}>
+                팔로잉 {(followingList as FollowItem[]).length}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.modalTab, followModalTab === 'followers' && styles.modalTabActive]}
+              onPress={() => setFollowModalTab('followers')}
+            >
+              <Text style={[styles.modalTabText, followModalTab === 'followers' && styles.modalTabTextActive]}>
+                팔로워 {(followerList as FollowerItem[]).length}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 목록 */}
+          <FlatList
+            data={followModalTab === 'following' ? (followingList as FollowItem[]) : (followerList as FollowerItem[]) as (FollowItem | FollowerItem)[]}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+            renderItem={({ item }) =>
+              followModalTab === 'following'
+                ? <FollowingItemRow item={item as FollowItem} />
+                : <FollowerItemRow item={item as FollowerItem} />
+            }
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>
+                {followModalTab === 'following' ? '팔로잉한 농장주가 없습니다.' : '팔로워가 없습니다.'}
+              </Text>
+            }
+          />
+        </SafeAreaView>
+      </Modal>
+
     </SafeAreaView>
   )
 }
+
+// 팔로잉 아이템
+const FollowingItemRow = ({ item }: { item: FollowItem }) => (
+  <View style={styles.followItem}>
+    {item.farmerProfileImg ? (
+      <Image source={{ uri: item.farmerProfileImg }} style={styles.followAvatar} />
+    ) : (
+      <View style={[styles.followAvatar, styles.followAvatarFallback]}>
+        <Text style={styles.followAvatarText}>{item.farmerNickname?.[0]?.toUpperCase() ?? '?'}</Text>
+      </View>
+    )}
+    <View style={styles.followInfo}>
+      <Text style={styles.followNickname}>{item.farmerNickname}</Text>
+      <Text style={styles.followRole}>
+        {item.farmerRole === 'FARMER' ? '🌱 농장주' : '🌿 일반 회원'}
+      </Text>
+    </View>
+  </View>
+)
+
+// 팔로워 아이템
+const FollowerItemRow = ({ item }: { item: FollowerItem }) => (
+  <View style={styles.followItem}>
+    <View style={[styles.followAvatar, styles.followAvatarFallback]}>
+      <Text style={styles.followAvatarText}>{item.followerNickname?.[0]?.toUpperCase() ?? '?'}</Text>
+    </View>
+    <View style={styles.followInfo}>
+      <Text style={styles.followNickname}>{item.followerNickname}</Text>
+    </View>
+  </View>
+)
 
 // 정보 행 컴포넌트
 const InfoRow = ({ icon, label, value }: { icon: any; label: string; value?: string }) => (
@@ -513,4 +630,118 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+
+    // 히어로 통계
+  heroStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  heroStatItem: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  heroStatCount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  heroStatLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  heroStatDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+
+  // 모달
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#333',
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalTabRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalTabActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#6A9469',
+  },
+  modalTabText: {
+    fontSize: 14,
+    color: '#aaa',
+    fontWeight: '600',
+  },
+  modalTabTextActive: {
+    color: '#6A9469',
+  },
+
+  // 팔로우 아이템
+  followItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+    gap: 12,
+  },
+  followAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  followAvatarFallback: {
+    backgroundColor: '#e8f5e8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  followAvatarText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#6A9469',
+  },
+  followInfo: {
+    flex: 1,
+    gap: 3,
+  },
+  followNickname: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+  },
+  followRole: {
+    fontSize: 12,
+    color: '#888',
+  },
+
 })
