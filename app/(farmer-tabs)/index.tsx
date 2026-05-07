@@ -244,7 +244,7 @@ const Home = () => {
       <View style={styles.header}>
         <Text style={styles.logo}>🌿 NamuWiki Farm</Text>
         <View style={styles.headerIcons}>
-          <Pressable>
+          <Pressable onPress={() => router.push('/search')}>
             <Ionicons name="search-outline" size={24} color="#2C4A2C" />
           </Pressable>
           <Pressable>
