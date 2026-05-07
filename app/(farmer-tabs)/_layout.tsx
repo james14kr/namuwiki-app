@@ -15,6 +15,9 @@ const TabLayout = () => {
         tabBarInactiveTintColor: '#8A9E8A',
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          paddingTop: 0
+        }
       }}>
       <Tabs.Screen
         name="index"

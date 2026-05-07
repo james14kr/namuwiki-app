@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   // 농장 바 전체 컨테이너
   farmerBar: {
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#e8f5e8',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,

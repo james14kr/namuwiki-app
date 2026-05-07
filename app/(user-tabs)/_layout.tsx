@@ -16,7 +16,10 @@ const UserTabLayout = () => {
     <Tabs screenOptions={{
       tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
       headerShown: false,
-      tabBarButton: HapticTab
+      tabBarButton: HapticTab,
+      tabBarStyle: {
+        paddingTop: 0
+      }
     }}>
       <Tabs.Screen 
         name="index" 
