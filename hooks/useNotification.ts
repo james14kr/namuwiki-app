@@ -5,6 +5,13 @@ import { Client, Frame, IMessage } from "@stomp/stompjs";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
+// ws(s)://host/api/ws/websocket 형태로 변환
+// BASE_URL = "http://192.168.x.x:8080/api" → "ws://192.168.x.x:8080/api/ws/websocket"
+// BASE_URL = "https://xxxx.ngrok.../api"   → "wss://xxxx.ngrok.../api/ws/websocket"
+const wsProtocol = BASE_URL?.startsWith("https") ? "wss" : "ws";
+const wsHost = BASE_URL?.replace(/^https?:\/\//, "").replace(/\/api$/, "");
+const WS_URL = `${wsProtocol}://${wsHost}/api/ws/websocket`;
+
 // 알림 타입별 Toast 제목
 const NOTIFICATION_TITLE: Record<NotificationType, string> = {
   FOLLOW: "새 팔로워",
@@ -22,12 +29,10 @@ export const useNotification = (userId: string | null) => {
     // userId가 없으면 연결하지 않음
     if (!userId) return;
 
+    console.log("알림 WS 연결 시도:", WS_URL);
+
     const client = new Client({
-      // DM(useChat.ts)과 동일한 WebSocket 엔드포인트 사용
-      webSocketFactory: () =>
-        new WebSocket(
-          `ws://${BASE_URL?.replace("http://", "").replace("https://", "")}/api/ws/websocket`
-        ),
+      webSocketFactory: () => new WebSocket(WS_URL),
 
       onConnect: () => {
         console.log("알림 WebSocket 연결 성공");
