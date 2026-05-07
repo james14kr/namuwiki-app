@@ -30,6 +30,7 @@ export default function RootLayout() {
             <Stack.Screen name="post" options={{ headerShown: false }} />
             <Stack.Screen name="dm/[roomId]" options={{ headerShown: false }} />
             <Stack.Screen name="farm/register" options={{ headerShown: false }} />
+            <Stack.Screen name='search' options={{headerShown: false}}/>
           </Stack>
           <StatusBar style="auto" />
           <Toast />

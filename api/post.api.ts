@@ -38,4 +38,10 @@ export const postApi = {
     return data;
   },
 
+  //게시글 검색
+  search: async (keyword: string) => {
+    const {data} = await api.get<PostResponse[]>('/posts/search', {params : {keyword}})
+    return data;
+  }
+
 };
