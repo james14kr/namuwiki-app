@@ -1,10 +1,11 @@
-import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, ScrollView } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View, Image, ActivityIndicator, ScrollView, ImageBackground } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useGetCropList } from '@/queries/crop/useGetCropList'
 import { CropItem } from '@/types/cropType'
 import { Ionicons } from '@expo/vector-icons'
+import { useGetFarmDetail } from '@/queries/farm/useGetFarmDetail'
 
 const FarmDetailScreen = () => {
   const router = useRouter()
@@ -12,8 +13,9 @@ const FarmDetailScreen = () => {
   const numericFarmId = Number(farmId)
 
   const { data: cropList, isLoading } = useGetCropList(numericFarmId)
+  const { data: farmDetail, isLoading: farmLoading} = useGetFarmDetail(numericFarmId)
 
-  if (isLoading) return (
+  if (isLoading || farmLoading) return (
     <SafeAreaView style={styles.container}>
       <ActivityIndicator size="large" color="#6A9469" style={{ marginTop: 100 }} />
     </SafeAreaView>
@@ -33,6 +35,50 @@ const FarmDetailScreen = () => {
         keyExtractor={(item) => item.cropId.toString()}
         contentContainerStyle={{ padding: 16 }}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ListHeaderComponent={
+          <>
+            {/* 농장 배너 */}
+            {farmDetail?.farmImg ? (
+              <ImageBackground
+                source={{ uri: farmDetail.farmImg }}
+                style={styles.banner}
+                resizeMode="cover"
+              >
+                <View style={styles.bannerOverlay}>
+                  <Text style={styles.bannerFarmName}>{farmDetail.farmName}</Text>
+                  <View style={styles.bannerAddrRow}>
+                    <Ionicons name="location-outline" size={13} color="#fff" />
+                    <Text style={styles.bannerAddr}>{farmDetail.farmAddr}</Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            ) : (
+              <View style={[styles.banner, { backgroundColor: '#6A9469' }]}>
+                <View style={styles.bannerOverlay}>
+                  <Text style={styles.bannerFarmName}>{farmDetail?.farmName}</Text>
+                  <View style={styles.bannerAddrRow}>
+                    <Ionicons name="location-outline" size={13} color="#fff" />
+                    <Text style={styles.bannerAddr}>{farmDetail?.farmAddr}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* 농장 소개 카드 */}
+            {farmDetail?.farmDesc ? (
+              <View style={styles.introCard}>
+                <Text style={styles.introTitle}>농장 소개</Text>
+                <Text style={styles.introDesc}>{farmDetail.farmDesc}</Text>
+              </View>
+            ) : null}
+
+            {/* 농작물 목록 헤더 */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>🌱 농작물 목록</Text>
+            </View>
+          </>
+        }
+
         renderItem={({ item }: { item: CropItem }) => (
           <Pressable
             style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
@@ -98,7 +144,7 @@ const styles = StyleSheet.create({
   },
   cropImg: { width: '100%', height: 120 },
   cropImgPlaceholder: {
-    width: '100%', height: 120,
+    width: '100%', height: 200,
     backgroundColor: '#e8f5e8',
     alignItems: 'center', justifyContent: 'center',
   },
@@ -110,4 +156,45 @@ const styles = StyleSheet.create({
   healthLink: { fontSize: 13, color: '#6A9469', fontWeight: '600' },
   emptyWrap: { alignItems: 'center', marginTop: 60 },
   emptyText: { fontSize: 15, color: '#aaa' },
+  banner: {
+  height: 200,
+  justifyContent: 'flex-end',
+  },
+  bannerOverlay: {
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  bannerFarmName: {
+    fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 4,
+  },
+  bannerAddrRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+  },
+  bannerAddr: {
+    fontSize: 13, color: '#eee',
+  },
+  introCard: {
+    marginHorizontal: 0,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  introTitle: {
+    fontSize: 14, fontWeight: 'bold', color: '#2C4A2C', marginBottom: 8,
+  },
+  introDesc: {
+    fontSize: 13, color: '#666', lineHeight: 20,
+  },
+  sectionHeader: {
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 15, fontWeight: 'bold', color: '#2C4A2C',
+  },
 })
