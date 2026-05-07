@@ -1,16 +1,3 @@
-export const connectNotification = (userId: string) => {
-  const eventSource = new EventSource(
-    `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/notifications/subscribe/${userId}`
-  );
-
-  eventSource.addEventListener("notification", (event) => {
-    const data = JSON.parse(event.data);
-    alert(data.message);
-  });
-
-  eventSource.onerror = (error) => {
-    console.error("SSE error", error);
-  };
-
-  return eventSource;
-};
+// SSE 방식 대신 STOMP WebSocket 사용 (hooks/useNotification.ts 참고)
+// 백엔드에 /notifications/subscribe/{userId} SSE 엔드포인트가 없어서 미사용
+export {};

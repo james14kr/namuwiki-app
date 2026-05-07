@@ -1,4 +1,5 @@
 import Input from "@/components/ui/Input";
+import { useNotificationContext } from "@/contexts/notificationContext";
 import { usePostLogin } from "@/queries/member.queries";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -30,6 +31,7 @@ interface CustomJwtPayload {
 const Login = () => {
   const router = useRouter();
   const usePostLoginMutate = usePostLogin();
+  const { setCurrentUserId } = useNotificationContext();
 
   const [loginData, setLoginData] = useState({
     memEmail: "",
@@ -151,6 +153,8 @@ const Login = () => {
             console.log("payload:", payload);
             console.log("payload:", payload.role);
             const role = payload.role;
+            // 알림 SSE 연결 시작
+            setCurrentUserId(payload.sub);
             if (role === "FARMER") {
               router.replace("/(farmer-tabs)");
             } else {
