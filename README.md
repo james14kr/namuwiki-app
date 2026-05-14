@@ -1,50 +1,100 @@
-# Welcome to your Expo app 👋
+# 🌱 NamuWiki Farm  
+**IoT 기기 연동 & 스마트팜 SNS 모바일 앱 풀스택 개발**  
+*(Python, Java/Spring Boot, React Native + Expo)*  
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+---
 
-## Get started
+## 📌 프로젝트 개요  
 
-1. Install dependencies
+안녕하세요! NamuWiki Farm은 **스마트팜 관리와 SNS를 결합한 IoT 기반 풀스택 플랫폼**입니다.  
+**농장 모니터링부터 소비자와의 소통까지** 모두 가능한 서비스를 구현했습니다.  
 
-   ```bash
-   npm install
-   ```
+- 🤖 **IoT 기기 자동제어 시스템** (Python, Raspberry Pi)  
+- 🖥️ **API 서버** (Java/Spring Boot + MariaDB)  
+- 📱 **모바일 앱** (React Native + Expo)  
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🔗 레포지토리  
 
-In the output, you'll find options to open the app in a
+| 구분 | 기술 스택 | 링크 |
+|------|-----------|------|
+| 📱 App | React Native + Expo | [namuwiki-app](https://github.com/저장소링크) |
+| 🖥️ Backend | Java/Spring Boot + MariaDB | [namuwiki-back](https://github.com/저장소링크) |
+| 🤖 IoT 제어 | Python (Raspberry Pi) | [namuwiki-python](https://github.com/저장소링크) |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🌿 주요 기능  
 
-## Get a fresh project
+✅ **IoT 기기 실시간 모니터링 및 자동/수동 제어**  
+✅ **스마트팜 SNS (게시글, 댓글, 좋아요, 팔로우, 실시간 DM 채팅)**  
+✅ **농장주 / 일반 사용자 역할 분리 구조**  
+✅ **AWS S3 이미지 업로드 및 날씨 정보 연동**  
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 📱 앱 시연  
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+| 기능 | 미리보기 |
+|------|----------|
+| 🔐 로그인 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🏠 홈 피드 (무한스크롤) | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🌡️ 센서 데이터 모니터링 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🎛️ 기기 수동/자동 제어 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 💬 실시간 DM 채팅 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 👤 프로필 / 팔로우 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🛠️ 사용 기술  
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| 분야 | 기술 스택 |
+|------|-----------|
+| **모바일 앱** | React Native, Expo SDK 54, TypeScript |
+| **라우팅** | Expo Router 6 (파일 기반 라우팅) |
+| **서버 상태 관리** | TanStack Query v5 |
+| **실시간 채팅** | WebSocket + STOMP (`@stomp/stompjs`) |
+| **인증** | JWT + expo-secure-store + jwt-decode |
+| **이미지 업로드** | AWS S3 Presigned URL + expo-image-manipulator |
+| **날씨** | expo-location + OpenWeatherMap API |
+| **백엔드** | Java, Spring Boot, MariaDB, MyBatis |
+| **IoT 제어** | Python, Raspberry Pi |
+| **협업 도구** | GitHub, Notion |
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🔍 프로젝트 특징  
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- 🌿 **실제 IoT 기기 제어 경험**  
+  - 온도·습도·조도·토양수분 센서를 통한 실시간 데이터 측정  
+  - 자동/수동 모드 전환으로 팬·LED·펌프 제어  
+  - DB OVERRIDE 컬럼을 활용한 앱 → 서버 → Python → 하드웨어 제어 흐름 구현  
+
+- 📱 **역할 기반 모바일 앱 설계**  
+  - Expo Router 파일 기반 라우팅으로 농장주(farmer-tabs)와 일반 사용자(user-tabs) 완전 분리  
+  - JWT 토큰의 role 값으로 로그인 시 자동 분기 처리  
+
+- 💬 **SNS + 실시간 채팅 통합**  
+  - 게시글·댓글·좋아요·팔로우·홈 피드 무한스크롤 구현  
+  - WebSocket STOMP 기반 실시간 DM 채팅  
+
+---
+
+## 👥 팀원  
+
+| 이름 | 담당 역할 |
+|------|-----------|
+| 본인 | 모바일 앱 전반 (네비게이션 구조, 농장·기기·센서·팔로우·프로필·UI) |
+| 김유정 | 로그인 / DM 실시간 채팅 |
+| 김재근 | 게시글 / 홈 피드 |
+
+---
+
+## 💡 느낀 점  
+
+이 프로젝트를 통해 **단순한 앱 개발을 넘어 IoT 기기 제어와 데이터 통신**까지 경험할 수 있었습니다.  
+특히 앱 버튼 하나로 DB를 거쳐 라즈베리파이의 팬과 LED가 실제로 동작할 때,  
+"내 코드가 실제 기기를 움직인다"는 성취감을 느꼈습니다.  
+JWT 인코딩 오류, S3 업로드 방식, pymysql autocommit 등 예상치 못한 문제를 직접 해결하면서  
+**디버깅 능력과 전체 시스템을 보는 시각**을 키운 경험이었습니다.  
