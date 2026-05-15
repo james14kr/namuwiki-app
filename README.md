@@ -19,9 +19,9 @@
 
 | 구분 | 기술 스택 | 링크 |
 |------|-----------|------|
-| 📱 App | React Native + Expo | [namuwiki-app](https://github.com/저장소링크) |
-| 🖥️ Backend | Java/Spring Boot + MariaDB | [namuwiki-back](https://github.com/저장소링크) |
-| 🤖 IoT 제어 | Python (Raspberry Pi) | [namuwiki-python](https://github.com/저장소링크) |
+| 📱 App | React Native + Expo | [namuwiki-app](https://github.com/james14kr/namuwiki-app.git) |
+| 🖥️ Backend | Java/Spring Boot + MariaDB | [namuwiki-back](https://github.com/james14kr/namuwiki.git) |
+| 🤖 IoT 제어 | Python (Raspberry Pi) | [namuwiki-python](https://github.com/james14kr/namuwiki-IoT.git) |
 
 ---
 
@@ -38,12 +38,14 @@
 
 | 기능 | 미리보기 |
 |------|----------|
-| 🔐 로그인 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🔐 로그인 | <img src="assets/images/readme/LoginGIF-1-ezgif.com-video-to-gif-converter.gif" width="250"/> |
 | 🏠 홈 피드 (무한스크롤) | <img src="스크린샷_또는_GIF_링크" width="250"/> |
 | 🌡️ 센서 데이터 모니터링 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 🎛️ 기기 수동/자동 제어 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 👨‍🌾 일반사용자 농작물 건강도 조회 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🎛️ 임계값 변경/기기 수동/자동 제어 | <img src="assets/images/readme/ThresholdAdjustmentManual&AutomaticDeviceControl-1.mp4" width="250"/> |
 | 💬 실시간 DM 채팅 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 👤 프로필 / 팔로우 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 👤 프로필 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 👤 팔로우 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
 
 ---
 
