@@ -38,14 +38,17 @@
 
 | 기능 | 미리보기 |
 |------|----------|
-| 🔐 로그인 | <img src="assets/images/readme/LoginGIF-1-ezgif.com-video-to-gif-converter.gif" width="250"/> |
-| 🏠 홈 피드 (무한스크롤) | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 🌡️ 센서 데이터 모니터링 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 👨‍🌾 일반사용자 농작물 건강도 조회 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 🎛️ 임계값 변경/기기 수동/자동 제어 | <img src="assets/images/readme/ThresholdAdjustmentManual&AutomaticDeviceControl-1.mp4" width="250"/> |
-| 💬 실시간 DM 채팅 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 👤 프로필 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
-| 👤 팔로우 | <img src="스크린샷_또는_GIF_링크" width="250"/> |
+| 🔐 로그인 | ![로그인](https://github.com/user-attachments/assets/736cd3c5-a287-4f6a-903e-3daa7f29f7af)|
+| 🏠 홈 피드 (무한스크롤) | ![홈피트](https://github.com/user-attachments/assets/f1f6ae0e-292a-49f3-82ec-6e4f5b81ded7) |
+| 🌡️ 센서 데이터 모니터링 | ![센서 데이터 모니터링](https://github.com/user-attachments/assets/4f819554-01d5-4bd0-97af-b9eee9e8888e) |
+| 👨‍🌾 일반사용자 농작물 건강도 조회 | ![일반사용자 농작물 건강도 조회](https://github.com/user-attachments/assets/0b17b24a-bf94-4dea-a68a-8de4e4dd58a5) |
+| ⚙️ 임계값 변경 | ![임계값변경](https://github.com/user-attachments/assets/bab9a7d3-d517-4f4a-9a27-4f165b470798) |
+| 🟢 기기 수동ON | ![기기 수동 ON](https://github.com/user-attachments/assets/c4b4fcce-7a7b-4de3-9327-ad3f3eff7c34) |
+| 🔴 기기 수동OFF | ![기기 수동 OFF](https://github.com/user-attachments/assets/481996a3-3395-4388-82ca-a84d6c59fa7d) |
+| 🛠 기기 자동 제어 | ![기기 자동 제어](https://github.com/user-attachments/assets/a6f55d05-9a37-48fd-b1f5-8e498d05695c) |
+| 💬 실시간 DM 채팅 | ![실시간 DM 채팅](https://github.com/user-attachments/assets/3a051760-fc9a-481c-b420-adec767d93a5) |
+| 👤 프로필 | ![프로필](https://github.com/user-attachments/assets/1700b69f-b571-43ff-9e29-9679932c7565) |
+| 👤 팔로우 | ![팔로우](https://github.com/user-attachments/assets/b185268d-540a-4477-8323-2d8845107ec2) |
 
 ---
 
@@ -87,7 +90,7 @@
 
 | 이름 | 담당 역할 |
 |------|-----------|
-| 본인 | 모바일 앱 전반 (네비게이션 구조, 농장·기기·센서·팔로우·프로필·UI) |
+| 황민서 | 모바일 앱 전반 (네비게이션 구조, 농장·기기·센서·팔로우·프로필·UI) |
 | 김유정 | 로그인 / DM 실시간 채팅 |
 | 김재근 | 게시글 / 홈 피드 |
 
