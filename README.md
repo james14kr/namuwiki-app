@@ -37,37 +37,37 @@
 ## 📱 앱 시연
 
 ### 🔐 로그인
-<img src="assets/images/readme/LoginGIF-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/LoginGIF-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 🏠 홈 피드 (무한스크롤)
-<img src="assets/images/readme/HomeFeed-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/HomeFeed-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 🌡️ 센서 데이터 모니터링
-<img src="assets/images/readme/SensorDataMonitoring-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/SensorDataMonitoring-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 👨‍🌾 일반사용자 농작물 건강도 조회
-<img src="assets/images/readme/CropHealthStatusCheck-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/CropHealthStatusCheck-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### ⚙️ 임계값 변경
-<img src="assets/images/readme/ThresholdAdjustment-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/ThresholdAdjustment-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 🟢 기기 수동 ON
-<img src="assets/images/readme/ON-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/ON-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 🔴 기기 수동 OFF
-<img src="assets/images/readme/OFF-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/OFF-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 🛠️ 기기 자동 제어
-<img src="assets/images/readme/AUTO-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/AUTO-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 💬 실시간 DM 채팅
-<img src="assets/images/readme/Real-TimeDirectMessageChat-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/Real-TimeDirectMessageChat-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 👤 프로필
-<img src="assets/images/readme/Profile-12-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/Profile-12-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ### 👤 팔로우
-<img src="assets/images/readme/Follow-1-ezgif.com-video-to-gif-converter.gif" width="350"/>
+<img src="assets/images/readme/Follow-1-ezgif.com-video-to-gif-converter.gif" width="100%"/>
 
 ---
 
