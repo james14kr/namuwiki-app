@@ -3,13 +3,14 @@ import { useGetSensorHistory } from '@/queries/sensor/useGetSensorHistory'
 import { SensorHistory } from '@/types/namuType'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Sensor = () => {
   const { cropId } = useLocalSearchParams()
   const numericCropId = Number(cropId)
+  const { width } = useWindowDimensions()
 
   const { data: sensorData, isLoading, isError, error } = useGetSensorData(numericCropId)
 
@@ -31,7 +32,7 @@ const Sensor = () => {
     setHistoryLimit(5)
   }, [historyPeriod])
 
-  const limitMap = {day: 100, week: 200, month: 500}
+  const limitMap = {day: 50, week: 100, month: 150}
 
   const { data: chartHistoryList } = useGetSensorHistory(
     numericCropId,
@@ -186,6 +187,7 @@ const Sensor = () => {
         {chartData.length > 0 ? (
           <LineChart
             data={chartData}
+            width={width - 60}
             height={200}
             color1='#6a9469'
             thickness={2}
